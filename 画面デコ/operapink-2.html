@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Opera Pink 02 — Ether Orbs</title>
+  <style>
+    * { margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #040106; }
+    canvas { display: block; width: 100%; height: 100%; }
+  </style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+let W, H, t = 0;
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+
+const orbs = [];
+for (let i = 0; i < 12; i++) {
+  orbs.push({
+    x: Math.random(),
+    y: Math.random(),
+    r: 30 + Math.random() * 90,
+    vx: (Math.random() - 0.5) * 0.0004,
+    vy: (Math.random() - 0.5) * 0.0003,
+    phase: Math.random() * Math.PI * 2,
+    hue: 320 + Math.random() * 30
+  });
+}
+
+function draw() {
+  t += 0.01;
+  ctx.fillStyle = 'rgba(4,1,6,0.15)';
+  ctx.fillRect(0, 0, W, H);
+
+  // deep ambient
+  const bg = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, Math.max(W, H) * 0.7);
+  bg.addColorStop(0, 'rgba(40,5,25,0.15)');
+  bg.addColorStop(1, 'transparent');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  orbs.forEach((o, i) => {
+    o.x += o.vx + Math.sin(t * 0.4 + o.phase) * 0.00015;
+    o.y += o.vy + Math.cos(t * 0.35 + o.phase) * 0.00012;
+    if (o.x < -0.2) o.x = 1.2;
+    if (o.x > 1.2) o.x = -0.2;
+    if (o.y < -0.2) o.y = 1.2;
+    if (o.y > 1.2) o.y = -0.2;
+
+    const px = o.x * W;
+    const py = o.y * H;
+    const pulse = 0.75 + Math.sin(t * 1.2 + o.phase) * 0.25;
+    const r = o.r * pulse;
+
+    // outer glow
+    const g1 = ctx.createRadialGradient(px, py, 0, px, py, r * 1.8);
+    g1.addColorStop(0, `hsla(${o.hue}, 70%, 55%, 0.12)`);
+    g1.addColorStop(0.5, `hsla(${o.hue}, 60%, 40%, 0.05)`);
+    g1.addColorStop(1, 'transparent');
+    ctx.fillStyle = g1;
+    ctx.beginPath();
+    ctx.arc(px, py, r * 1.8, 0, Math.PI * 2);
+    ctx.fill();
+
+    // core
+    const g2 = ctx.createRadialGradient(px, py, 0, px, py, r);
+    g2.addColorStop(0, `hsla(${o.hue}, 80%, 70%, 0.35)`);
+    g2.addColorStop(0.4, `hsla(${o.hue}, 70%, 50%, 0.15)`);
+    g2.addColorStop(1, 'transparent');
+    ctx.fillStyle = g2;
+    ctx.beginPath();
+    ctx.arc(px, py, r, 0, Math.PI * 2);
+    ctx.fill();
+
+    // bright nucleus
+    ctx.beginPath();
+    ctx.arc(px, py, r * 0.15, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(${o.hue}, 90%, 85%, ${0.4 + Math.sin(t * 2 + i) * 0.2})`;
+    ctx.fill();
+  });
+
+  // connecting faint lines between close orbs
+  for (let i = 0; i < orbs.length; i++) {
+    for (let j = i + 1; j < orbs.length; j++) {
+      const dx = (orbs[i].x - orbs[j].x) * W;
+      const dy = (orbs[i].y - orbs[j].y) * H;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 280) {
+        const a = (1 - dist / 280) * 0.08;
+        ctx.beginPath();
+        ctx.moveTo(orbs[i].x * W, orbs[i].y * H);
+        ctx.lineTo(orbs[j].x * W, orbs[j].y * H);
+        ctx.strokeStyle = `rgba(220,80,140,${a})`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+    }
+  }
+
+  requestAnimationFrame(draw);
+}
+draw();
+</script>
+</body>
+</html>

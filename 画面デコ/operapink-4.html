@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Opera Pink 04 — Geometry Bloom</title>
+  <style>
+    * { margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #050208; }
+    canvas { display: block; width: 100%; height: 100%; }
+  </style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+let W, H, cx, cy, t = 0;
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+  cx = W / 2; cy = H / 2;
+}
+window.addEventListener('resize', resize);
+resize();
+
+function drawPoly(sides, radius, rot, alpha, lineW) {
+  ctx.beginPath();
+  for (let i = 0; i <= sides; i++) {
+    const a = (i / sides) * Math.PI * 2 + rot;
+    const x = cx + Math.cos(a) * radius;
+    const y = cy + Math.sin(a) * radius;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.strokeStyle = `rgba(210,50,120,${alpha})`;
+  ctx.lineWidth = lineW;
+  ctx.stroke();
+}
+
+function draw() {
+  t += 0.008;
+  ctx.fillStyle = 'rgba(5,2,8,0.14)';
+  ctx.fillRect(0, 0, W, H);
+
+  const maxR = Math.min(W, H) * 0.48;
+
+  // expanding concentric polygons
+  for (let i = 0; i < 14; i++) {
+    const progress = ((t * 0.3 + i * 0.12) % 1.4);
+    if (progress > 1) continue;
+    const r = progress * maxR;
+    const alpha = (1 - progress) * 0.35;
+    const sides = 5 + (i % 4);
+    const rot = t * (0.2 + i * 0.03) * (i % 2 === 0 ? 1 : -1);
+    drawPoly(sides, r, rot, alpha, 1.2 + (1 - progress) * 1.5);
+  }
+
+  // inner rotating star-like
+  for (let k = 0; k < 3; k++) {
+    const r = maxR * (0.15 + k * 0.12) * (0.9 + Math.sin(t * 1.5 + k) * 0.1);
+    const rot = t * (0.4 - k * 0.1);
+    ctx.beginPath();
+    for (let i = 0; i <= 10; i++) {
+      const a = (i / 10) * Math.PI * 2 + rot;
+      const rad = i % 2 === 0 ? r : r * 0.45;
+      const x = cx + Math.cos(a) * rad;
+      const y = cy + Math.sin(a) * rad;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.strokeStyle = `rgba(230,80,140,${0.2 - k * 0.04})`;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  }
+
+  // soft center glow
+  const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR * 0.35);
+  g.addColorStop(0, `rgba(200,40,100,${0.12 + Math.sin(t * 1.2) * 0.05})`);
+  g.addColorStop(0.6, 'rgba(120,20,60,0.04)');
+  g.addColorStop(1, 'transparent');
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(cx, cy, maxR * 0.35, 0, Math.PI * 2);
+  ctx.fill();
+
+  // orbiting dots
+  for (let i = 0; i < 16; i++) {
+    const a = t * 0.5 + (i / 16) * Math.PI * 2;
+    const r = maxR * (0.55 + Math.sin(t + i) * 0.08);
+    const x = cx + Math.cos(a) * r;
+    const y = cy + Math.sin(a) * r;
+    const size = 1.5 + Math.sin(t * 2 + i) * 1;
+    ctx.beginPath();
+    ctx.arc(x, y, size, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255,160,200,${0.3 + Math.sin(t * 3 + i) * 0.2})`;
+    ctx.fill();
+  }
+
+  requestAnimationFrame(draw);
+}
+draw();
+</script>
+</body>
+</html>

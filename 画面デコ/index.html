@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>画面デコ | 5G_FEST</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      background: #050508;
+      color: #e8e0f0;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      padding: 2.5rem 1.5rem 4rem;
+    }
+    h1 {
+      text-align: center;
+      font-size: 1.8rem;
+      letter-spacing: 0.15em;
+      margin-bottom: 0.4rem;
+      text-shadow: 0 0 20px #c060a0;
+    }
+    .sub {
+      text-align: center;
+      opacity: 0.6;
+      font-size: 0.9rem;
+      margin-bottom: 2.5rem;
+    }
+    section {
+      max-width: 900px;
+      margin: 0 auto 2.5rem;
+    }
+    h2 {
+      font-size: 1.05rem;
+      letter-spacing: 0.08em;
+      margin-bottom: 1rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1rem;
+    }
+    a.card {
+      display: block;
+      padding: 1.3rem 1.2rem;
+      border-radius: 12px;
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.2s, box-shadow 0.2s;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    a.card:hover {
+      transform: translateY(-3px);
+    }
+    .mirror a.card {
+      background: linear-gradient(145deg, #12121a, #1a1a28);
+    }
+    .mirror a.card:hover {
+      box-shadow: 0 8px 28px rgba(180, 200, 255, 0.25);
+      border-color: rgba(180, 200, 255, 0.3);
+    }
+    .opera a.card {
+      background: linear-gradient(145deg, #120810, #1a0c14);
+    }
+    .opera a.card:hover {
+      box-shadow: 0 8px 28px rgba(200, 60, 120, 0.3);
+      border-color: rgba(200, 80, 130, 0.35);
+    }
+    .card strong {
+      display: block;
+      font-size: 1rem;
+      margin-bottom: 0.3rem;
+    }
+    .card span {
+      font-size: 0.8rem;
+      opacity: 0.65;
+    }
+    .back {
+      text-align: center;
+      margin-top: 2rem;
+    }
+    .back a {
+      color: #a090b0;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .back a:hover { color: #e0d0f0; }
+  </style>
+</head>
+<body>
+  <h1>画面デコ</h1>
+  <p class="sub">天吊モニター・暗闇部屋向けフルスクリーンアニメーション</p>
+
+  <section class="mirror">
+    <h2>ミラーボール風（3種）</h2>
+    <div class="grid">
+      <a class="card" href="mirrorball-1.html" target="_blank">
+        <strong>Mirror Ball 01</strong>
+        <span>クラシック回転ミラーボール + 光線</span>
+      </a>
+      <a class="card" href="mirrorball-2.html" target="_blank">
+        <strong>Mirror Ball 02</strong>
+        <span>ファセット反射・きらめき粒子</span>
+      </a>
+      <a class="card" href="mirrorball-3.html" target="_blank">
+        <strong>Mirror Ball 03</strong>
+        <span>ソフトグロー球体と光の筋</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="opera">
+    <h2>オペラピンク 妖美（5種）</h2>
+    <div class="grid">
+      <a class="card" href="operapink-1.html" target="_blank">
+        <strong>Opera Pink 01</strong>
+        <span>流れるシルクの波動</span>
+      </a>
+      <a class="card" href="operapink-2.html" target="_blank">
+        <strong>Opera Pink 02</strong>
+        <span>脈打つエーテルの球</span>
+      </a>
+      <a class="card" href="operapink-3.html" target="_blank">
+        <strong>Opera Pink 03</strong>
+        <span>舞い散る花びら粒子</span>
+      </a>
+      <a class="card" href="operapink-4.html" target="_blank">
+        <strong>Opera Pink 04</strong>
+        <span>幾何学的に開く模様</span>
+      </a>
+      <a class="card" href="operapink-5.html" target="_blank">
+        <strong>Opera Pink 05</strong>
+        <span>体積光の光線と霞</span>
+      </a>
+    </div>
+  </section>
+
+  <div class="back">
+    <a href="../">← 5G_FEST トップへ</a>
+  </div>
+</body>
+</html>
