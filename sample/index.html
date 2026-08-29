@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D ピタゴラスイッチ | 5G_FEST</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      overflow: hidden;
+      background: #0a0a12;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: #e8e8ff;
+    }
+    #canvas-container {
+      position: fixed;
+      inset: 0;
+    }
+    #ui {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 10;
+      pointer-events: none;
+      padding: 1.2rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent);
+    }
+    #ui h1 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-shadow: 0 0 12px #5a9fff;
+    }
+    #ui .status {
+      font-size: 0.85rem;
+      opacity: 0.85;
+      margin-top: 0.3rem;
+    }
+    #controls {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      display: flex;
+      gap: 0.8rem;
+      pointer-events: auto;
+    }
+    button {
+      padding: 0.7rem 1.4rem;
+      border: none;
+      border-radius: 40px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.03em;
+    }
+    #startBtn {
+      background: linear-gradient(135deg, #3a7fff, #6a4fff);
+      color: white;
+      box-shadow: 0 6px 20px rgba(74, 120, 255, 0.45);
+    }
+    #startBtn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(74, 120, 255, 0.6);
+    }
+    #startBtn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    #resetBtn {
+      background: rgba(255,255,255,0.12);
+      color: #e0e0ff;
+      border: 1px solid rgba(255,255,255,0.25);
+    }
+    #resetBtn:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    #hint {
+      position: fixed;
+      bottom: 4.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.78rem;
+      opacity: 0.6;
+      text-align: center;
+      z-index: 10;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="canvas-container"></div>
+  <div id="ui">
+    <div>
+      <h1>3D ピタゴラスイッチ</h1>
+      <div class="status" id="status">準備完了 — スタートを押してください</div>
+    </div>
+  </div>
+  <div id="hint">マウスで視点操作 / ホイールでズーム</div>
+  <div id="controls">
+    <button id="startBtn">スタート</button>
+    <button id="resetBtn">リセット</button>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/cannon@0.6.2/build/cannon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+  <script>
+    // ============================================================
+    //  3D ピタゴラスイッチ - 物理法則に基づく本格ギミック連鎖
+    //  Three.js + Cannon.js
+    //  はらはら系・本物風・多段ギミック
+    // ============================================================
+
+    let scene, camera, renderer, controls, world;
+    let meshes = [];
+    let bodies = [];
+    let started = false;
+    let clock = new THREE.Clock();
+
+    // 状態管理
+    const statusEl = document.getElementById('status');
+    const startBtn = document.getElementById('startBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    // ------------------------------------------------------------
+    //  初期化
+    // ------------------------------------------------------------
+    function init() {
+      // Three.js
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x0a0a14);
+      scene.fog = new THREE.FogExp2(0x0a0a14, 0.018);
+
+      camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 200);
+      camera.position.set(8, 12, 18);
+
+      renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.08;
+      controls.target.set(0, 4, 0);
+      controls.maxPolarAngle = Math.PI * 0.48;
+      controls.minDistance = 5;
+      controls.maxDistance = 40;
+
+      // 照明
+      const ambient = new THREE.AmbientLight(0x404060, 0.6);
+      scene.add(ambient);
+
+      const dirLight = new THREE.DirectionalLight(0xfff5e6, 1.1);
+      dirLight.position.set(12, 20, 10);
+      dirLight.castShadow = true;
+      dirLight.shadow.mapSize.set(2048, 2048);
+      dirLight.shadow.camera.near = 1;
+      dirLight.shadow.camera.far = 50;
+      dirLight.shadow.camera.left = -20;
+      dirLight.shadow.camera.right = 20;
+      dirLight.shadow.camera.top = 20;
+      dirLight.shadow.camera.bottom = -20;
+      scene.add(dirLight);
+
+      const point1 = new THREE.PointLight(0x4a90ff, 0.8, 30);
+      point1.position.set(-6, 8, 4);
+      scene.add(point1);
+
+      const point2 = new THREE.PointLight(0xff6a4a, 0.5, 25);
+      point2.position.set(8, 6, -5);
+      scene.add(point2);
+
+      // Cannon.js ワールド
+      world = new CANNON.World();
+      world.gravity.set(0, -9.82, 0);
+      world.broadphase = new CANNON.NaiveBroadphase();
+      world.solver.iterations = 15;
+      world.defaultContactMaterial.friction = 0.4;
+      world.defaultContactMaterial.restitution = 0.3;
+
+      // 床
+      createGround();
+
+      // ギミック一式を構築
+      buildPythagorasMachine();
+
+      // イベント
+      window.addEventListener('resize', onResize);
+      startBtn.addEventListener('click', startMachine);
+      resetBtn.addEventListener('click', resetMachine);
+
+      animate();
+    }
+
+    // ------------------------------------------------------------
+    //  ユーティリティ：メッシュ + 剛体を同時生成
+    // ------------------------------------------------------------
+    function addBox(size, pos, rot, mass, color, metalness = 0.3, roughness = 0.4) {
+      const geo = new THREE.BoxGeometry(size.x, size.y, size.z);
+      const mat = new THREE.MeshStandardMaterial({
+        color,
+        metalness,
+        roughness,
+        envMapIntensity: 0.8
+      });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      mesh.position.copy(pos);
+      if (rot) mesh.rotation.set(rot.x || 0, rot.y || 0, rot.z || 0);
+      scene.add(mesh);
+
+      const shape = new CANNON.Box(new CANNON.Vec3(size.x / 2, size.y / 2, size.z / 2));
+      const body = new CANNON.Body({ mass });
+      body.addShape(shape);
+      body.position.set(pos.x, pos.y, pos.z);
+      if (rot) body.quaternion.setFromEuler(rot.x || 0, rot.y || 0, rot.z || 0);
+      world.addBody(body);
+
+      meshes.push(mesh);
+      bodies.push(body);
+      return { mesh, body };
+    }
+
+    function addSphere(radius, pos, mass, color) {
+      const geo = new THREE.SphereGeometry(radius, 24, 24);
+      const mat = new THREE.MeshStandardMaterial({
+        color,
+        metalness: 0.7,
+        roughness: 0.25
+      });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.castShadow = true;
+      mesh.position.copy(pos);
+      scene.add(mesh);
+
+      const shape = new CANNON.Sphere(radius);
+      const body = new CANNON.Body({ mass });
+      body.addShape(shape);
+      body.position.set(pos.x, pos.y, pos.z);
+      body.linearDamping = 0.05;
+      body.angularDamping = 0.05;
+      world.addBody(body);
+
+      meshes.push(mesh);
+      bodies.push(body);
+      return { mesh, body };
+    }
+
+    function addCylinder(radiusTop, radiusBottom, height, pos, rot, mass, color) {
+      const geo = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, 20);
+      const mat = new THREE.MeshStandardMaterial({ color, metalness: 0.4, roughness: 0.35 });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      mesh.position.copy(pos);
+      if (rot) mesh.rotation.set(rot.x || 0, rot.y || 0, rot.z || 0);
+      scene.add(mesh);
+
+      // Cannon cylinder は Y軸基準
+      const shape = new CANNON.Cylinder(radiusTop, radiusBottom, height, 16);
+      const body = new CANNON.Body({ mass });
+      // Cannon の Cylinder は Z軸が長いので回転補正
+      const q = new CANNON.Quaternion();
+      q.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), Math.PI / 2);
+      body.addShape(shape, new CANNON.Vec3(), q);
+      body.position.set(pos.x, pos.y, pos.z);
+      if (rot) body.quaternion.setFromEuler(rot.x || 0, rot.y || 0, rot.z || 0);
+      world.addBody(body);
+
+      meshes.push(mesh);
+      bodies.push(body);
+      return { mesh, body };
+    }
+
+    // ------------------------------------------------------------
+    //  床
+    // ------------------------------------------------------------
+    function createGround() {
+      // ビジュアル
+      const geo = new THREE.PlaneGeometry(60, 60);
+      const mat = new THREE.MeshStandardMaterial({
+        color: 0x1a1a28,
+        roughness: 0.9,
+        metalness: 0.1
+      });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.rotation.x = -Math.PI / 2;
+      mesh.receiveShadow = true;
+      scene.add(mesh);
+
+      // 物理
+      const shape = new CANNON.Plane();
+      const body = new CANNON.Body({ mass: 0 });
+      body.addShape(shape);
+      body.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
+      world.addBody(body);
+    }
+
+    // ------------------------------------------------------------
+    //  メインのピタゴラ装置構築
+    // ------------------------------------------------------------
+    let firstBall, releasePlatform;
+    let gimmickBodies = [];
+
+    function buildPythagorasMachine() {
+      // === 1. スタート台（最初のボールを乗せる） ===
+      addBox(new THREE.Vector3(1.2, 0.15, 1.2), new THREE.Vector3(-7, 9.5, 0), null, 0, 0x3a4a6a);
+
+      // 最初のボール（鉄球風）
+      firstBall = addSphere(0.28, new THREE.Vector3(-7, 10.0, 0), 1.5, 0xc0c0d0);
+      // 最初は固定しておく（スタート時に解放）
+      firstBall.body.type = CANNON.Body.KINEMATIC;
+
+      // === 2. 急傾斜レール（はらはら要素：落ちそうな角度） ===
+      // 長い傾斜板
+      addBox(new THREE.Vector3(5.5, 0.12, 0.9), new THREE.Vector3(-4.2, 7.8, 0), { z: -0.38 }, 0, 0x5a6a8a);
+      // サイドレール（落ち防止だがギリギリ）
+      addBox(new THREE.Vector3(5.5, 0.25, 0.08), new THREE.Vector3(-4.2, 7.95, 0.48), { z: -0.38 }, 0, 0x4a5a7a);
+      addBox(new THREE.Vector3(5.5, 0.25, 0.08), new THREE.Vector3(-4.2, 7.95, -0.48), { z: -0.38 }, 0, 0x4a5a7a);
+
+      // === 3. シーソー（第1ギミック） ===
+      // 支点
+      addBox(new THREE.Vector3(0.3, 0.8, 0.3), new THREE.Vector3(-1.0, 5.6, 0), null, 0, 0x2a3a5a);
+      // シーソー本体（動く）
+      const seesaw = addBox(new THREE.Vector3(3.2, 0.12, 0.7), new THREE.Vector3(-1.0, 6.05, 0), null, 2.5, 0x8a6a4a, 0.2, 0.6);
+      // シーソーをヒンジ拘束
+      const seesawHinge = new CANNON.HingeConstraint(seesaw.body, new CANNON.Body({ mass: 0 }), {
+        pivotA: new CANNON.Vec3(0, 0, 0),
+        axisA: new CANNON.Vec3(0, 0, 1),
+        pivotB: new CANNON.Vec3(-1.0, 6.05, 0),
+        axisB: new CANNON.Vec3(0, 0, 1)
+      });
+      // 簡易実装：質量のある板を支点に乗せるだけでも動くが、より安定させるため固定支点を置く
+
+      // === 4. 第2ボール待機台（シーソーが傾くと落ちる） ===
+      addBox(new THREE.Vector3(0.9, 0.12, 0.9), new THREE.Vector3(1.0, 6.3, 0), null, 0, 0x3a4a6a);
+      const secondBall = addSphere(0.26, new THREE.Vector3(1.0, 6.75, 0), 1.2, 0xd0a060);
+
+      // === 5. 螺旋風スパイラルランプ（視覚的に面白い） ===
+      // 簡易スパイラル：複数の板を円弧状に配置
+      for (let i = 0; i < 8; i++) {
+        const angle = (i / 8) * Math.PI * 1.2;
+        const r = 1.8;
+        const x = 3.5 + Math.cos(angle) * r;
+        const z = Math.sin(angle) * r;
+        const y = 5.5 - i * 0.35;
+        addBox(new THREE.Vector3(1.1, 0.1, 0.45), new THREE.Vector3(x, y, z), { y: -angle + Math.PI / 2, z: -0.15 }, 0, 0x6a7a9a);
+      }
+
+      // === 6. ドミノ列（はらはら要素） ===
+      const dominoColor = 0xe8d0a0;
+      for (let i = 0; i < 9; i++) {
+        const d = addBox(
+          new THREE.Vector3(0.12, 0.7, 0.35),
+          new THREE.Vector3(5.5 + i * 0.32, 2.35, 0),
+          null,
+          0.4,
+          dominoColor,
+          0.1,
+          0.7
+        );
+        // わずかに傾きをつけて倒れやすく
+        d.body.quaternion.setFromEuler(0, 0, (Math.random() - 0.5) * 0.02);
+      }
+
+      // === 7. 振り子（ハンマー） ===
+      // 支点
+      addBox(new THREE.Vector3(0.25, 0.25, 0.25), new THREE.Vector3(8.8, 5.2, 0), null, 0, 0x2a3a5a);
+      // 棒
+      const pendulumRod = addBox(new THREE.Vector3(0.08, 2.2, 0.08), new THREE.Vector3(8.8, 4.1, 0), null, 0.8, 0x5a5a6a);
+      // 錘
+      const pendulumBob = addSphere(0.35, new THREE.Vector3(8.8, 2.9, 0), 3.0, 0x8a4a3a);
+      // 簡易連結：距離拘束風に位置を合わせる（本格的にはConstraintを使う）
+      // ここでは物理的に近い位置に置き、衝突で動くようにする
+
+      // === 8. 最終レールとゴール台 ===
+      addBox(new THREE.Vector3(4.0, 0.12, 0.8), new THREE.Vector3(11.5, 1.8, 0), { z: -0.18 }, 0, 0x5a6a8a);
+      addBox(new THREE.Vector3(1.5, 0.15, 1.5), new THREE.Vector3(14.2, 1.3, 0), null, 0, 0x3a5a4a);
+
+      // ゴールボール（最後に落ちる）
+      addSphere(0.3, new THREE.Vector3(14.2, 1.8, 0), 1.0, 0x60d0a0);
+
+      // === 9. 装飾・支柱 ===
+      // スタート付近の支柱
+      addBox(new THREE.Vector3(0.2, 9.5, 0.2), new THREE.Vector3(-7.8, 4.75, 0.8), null, 0, 0x2a2a3a);
+      addBox(new THREE.Vector3(0.2, 9.5, 0.2), new THREE.Vector3(-7.8, 4.75, -0.8), null, 0, 0x2a2a3a);
+
+      // 中間支柱
+      addBox(new THREE.Vector3(0.25, 6.0, 0.25), new THREE.Vector3(0, 3.0, 1.2), null, 0, 0x2a2a3a);
+      addBox(new THREE.Vector3(0.25, 6.0, 0.25), new THREE.Vector3(0, 3.0, -1.2), null, 0, 0x2a2a3a);
+
+      // 背景の壁（奥行き感）
+      const wallGeo = new THREE.BoxGeometry(40, 15, 0.3);
+      const wallMat = new THREE.MeshStandardMaterial({ color: 0x12121c, roughness: 0.95 });
+      const wall = new THREE.Mesh(wallGeo, wallMat);
+      wall.position.set(3, 7, -8);
+      wall.receiveShadow = true;
+      scene.add(wall);
+
+      // グリッド補助線（床）
+      const grid = new THREE.GridHelper(40, 40, 0x2a2a4a, 0x1a1a2a);
+      grid.position.y = 0.01;
+      scene.add(grid);
+    }
+
+    // ------------------------------------------------------------
+    //  スタート / リセット
+    // ------------------------------------------------------------
+    function startMachine() {
+      if (started) return;
+      started = true;
+      startBtn.disabled = true;
+      statusEl.textContent = '連鎖開始… ボールが落ちます';
+
+      // 最初のボールをダイナミックに変更して少し押す
+      firstBall.body.type = CANNON.Body.DYNAMIC;
+      firstBall.body.velocity.set(1.8, -0.5, 0);
+      firstBall.body.wakeUp();
+
+      // 少し遅延させてステータス更新
+      setTimeout(() => {
+        if (started) statusEl.textContent = 'シーソーへ… はらはら…';
+      }, 1800);
+      setTimeout(() => {
+        if (started) statusEl.textContent = '第2ボール落下！ スパイラルへ';
+      }, 3500);
+      setTimeout(() => {
+        if (started) statusEl.textContent = 'ドミノ連鎖中… 倒れますか？';
+      }, 7000);
+      setTimeout(() => {
+        if (started) statusEl.textContent = '最終段階 — ゴールを目指せ！';
+      }, 11000);
+    }
+
+    function resetMachine() {
+      // ページリロードが最も確実（複雑なので）
+      location.reload();
+    }
+
+    // ------------------------------------------------------------
+    //  リサイズ
+    // ------------------------------------------------------------
+    function onResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    // ------------------------------------------------------------
+    //  アニメーションループ
+    // ------------------------------------------------------------
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const dt = Math.min(clock.getDelta(), 0.05);
+
+      // 物理ステップ（固定タイムステップ推奨）
+      world.step(1 / 60, dt, 3);
+
+      // メッシュを剛体に同期
+      for (let i = 0; i < meshes.length; i++) {
+        meshes[i].position.copy(bodies[i].position);
+        meshes[i].quaternion.copy(bodies[i].quaternion);
+      }
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    // 起動
+    init();
+  </script>
+</body>
+</html>
