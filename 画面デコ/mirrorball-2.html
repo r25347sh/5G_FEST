@@ -25,29 +25,59 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
-const N = 28;
+// ファセット密度アップ
+const N = 32;
 const points = [];
 for (let i = 0; i < N; i++) {
-  for (let j = 0; j < N / 2; j++) {
+  for (let j = 0; j < Math.floor(N / 2); j++) {
     const theta = (j / (N / 2)) * Math.PI;
     const phi = (i / N) * Math.PI * 2;
     points.push({
       x: Math.sin(theta) * Math.cos(phi),
       y: Math.cos(theta),
       z: Math.sin(theta) * Math.sin(phi),
-      phase: Math.random() * Math.PI * 2
+      phase: Math.random() * Math.PI * 2,
+      hueBias: Math.random() * 360  // 乱反射用の色バイアス
     });
   }
 }
 
+// 大量のきらめき粒子（カラフル）
 const particles = [];
-for (let i = 0; i < 160; i++) {
+for (let i = 0; i < 280; i++) {
   particles.push({
     angle: Math.random() * Math.PI * 2,
-    dist: 0.25 + Math.random() * 2.0,
-    speed: 0.002 + Math.random() * 0.007,
-    size: 0.6 + Math.random() * 3.2,
-    hue: 195 + Math.random() * 50
+    dist: 0.15 + Math.random() * 2.4,
+    speed: 0.003 + Math.random() * 0.01,
+    size: 0.8 + Math.random() * 4.5,
+    hue: Math.random() * 360,
+    sat: 70 + Math.random() * 30
+  });
+}
+
+// 多数の光線（カラフル）
+const beams = [];
+for (let i = 0; i < 28; i++) {
+  beams.push({
+    angle: (i / 28) * Math.PI * 2 + Math.random() * 0.2,
+    speed: 0.004 + Math.random() * 0.008,
+    width: 0.025 + Math.random() * 0.06,
+    len: 0.55 + Math.random() * 0.55,
+    hue: (i * 37 + Math.random() * 40) % 360,
+    alpha: 0.12 + Math.random() * 0.18
+  });
+}
+
+// 追加の二次光点（乱反射っぽい飛び散り）
+const flares = [];
+for (let i = 0; i < 40; i++) {
+  flares.push({
+    angle: Math.random() * Math.PI * 2,
+    dist: 0.4 + Math.random() * 1.6,
+    speed: 0.01 + Math.random() * 0.02,
+    size: 3 + Math.random() * 14,
+    hue: Math.random() * 360,
+    phase: Math.random() * Math.PI * 2
   });
 }
 
@@ -63,115 +93,166 @@ function rotate(p, ry, rx) {
 }
 
 function draw() {
-  t += 0.012;
+  t += 0.013;
 
-  // ほぼ真っ黒に近いクリア（コントラスト最大化）
-  ctx.fillStyle = 'rgba(0,0,0,0.42)';
+  // やや明るめに残す（天吊で映えるように）
+  ctx.fillStyle = 'rgba(0,0,0,0.22)';
   ctx.fillRect(0, 0, W, H);
 
-  const scale = Math.min(W, H) * 0.30;
-  const ry = t * 0.42;
-  const rx = 0.38 + Math.sin(t * 0.28) * 0.16;
+  const scale = Math.min(W, H) * 0.32;
+  const ry = t * 0.45;
+  const rx = 0.35 + Math.sin(t * 0.25) * 0.18;
 
-  // 外側きらめき — 暗い背景に対して鋭く光る
+  // ========== カラフル光線（大量） ==========
+  beams.forEach(b => {
+    b.angle += b.speed;
+    const pulse = 0.7 + Math.sin(t * 2.5 + b.angle * 3) * 0.3;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(b.angle);
+
+    const len = scale * 3.2 * b.len * pulse;
+    const grad = ctx.createLinearGradient(0, 0, 0, -len);
+    const h = (b.hue + t * 25) % 360;
+    grad.addColorStop(0, `hsla(${h}, 90%, 75%, ${b.alpha * pulse * 1.4})`);
+    grad.addColorStop(0.25, `hsla(${(h + 40) % 360}, 85%, 65%, ${b.alpha * 0.7})`);
+    grad.addColorStop(0.6, `hsla(${(h + 80) % 360}, 70%, 55%, ${b.alpha * 0.25})`);
+    grad.addColorStop(1, 'transparent');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    const w = scale * b.width * 1.2;
+    ctx.moveTo(-w, 0);
+    ctx.lineTo(w, 0);
+    ctx.lineTo(w * 5, -len);
+    ctx.lineTo(-w * 5, -len);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  });
+
+  // ========== 外側カラフルきらめき ==========
   particles.forEach(p => {
     p.angle += p.speed;
-    const px = cx + Math.cos(p.angle + t * 0.2) * p.dist * scale * 1.45;
-    const py = cy + Math.sin(p.angle + t * 0.2) * p.dist * scale * 0.72;
-    const flicker = Math.sin(t * 3.5 + p.angle * 4);
-    const a = 0.15 + Math.max(0, flicker) * 0.85; // 強く明滅
-    const sz = p.size * (0.6 + Math.max(0, flicker) * 0.9);
+    const px = cx + Math.cos(p.angle + t * 0.18) * p.dist * scale * 1.55;
+    const py = cy + Math.sin(p.angle * 0.9 + t * 0.15) * p.dist * scale * 0.78;
+    const flicker = Math.sin(t * 4 + p.angle * 5);
+    const a = 0.25 + Math.max(0, flicker) * 0.75;
+    const sz = p.size * (0.5 + Math.max(0, flicker) * 1.1);
+    const h = (p.hue + t * 40) % 360;
+
     ctx.beginPath();
     ctx.arc(px, py, sz, 0, Math.PI * 2);
-    ctx.fillStyle = `hsla(${p.hue}, 85%, 88%, ${a})`;
+    ctx.fillStyle = `hsla(${h}, ${p.sat}%, 80%, ${a})`;
     ctx.fill();
-    // ハイライト核
-    if (flicker > 0.4) {
+
+    if (flicker > 0.3) {
       ctx.beginPath();
-      ctx.arc(px, py, sz * 0.35, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(255,255,255,${flicker * 0.9})`;
+      ctx.arc(px, py, sz * 0.4, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${h}, 40%, 95%, ${flicker * 0.95})`;
       ctx.fill();
     }
   });
 
+  // ========== 二次フレア（乱反射の飛び散り） ==========
+  flares.forEach(f => {
+    f.angle += f.speed * 0.15;
+    const pulse = 0.4 + Math.sin(t * 3.5 + f.phase) * 0.6;
+    if (pulse < 0.3) return;
+    const px = cx + Math.cos(f.angle + t * 0.3) * f.dist * scale * 1.3;
+    const py = cy + Math.sin(f.angle * 0.8 + t * 0.25) * f.dist * scale * 0.7;
+    const h = (f.hue + t * 50) % 360;
+    const sz = f.size * pulse;
+
+    const g = ctx.createRadialGradient(px, py, 0, px, py, sz);
+    g.addColorStop(0, `hsla(${h}, 95%, 90%, ${0.55 * pulse})`);
+    g.addColorStop(0.35, `hsla(${(h + 30) % 360}, 90%, 70%, ${0.25 * pulse})`);
+    g.addColorStop(1, 'transparent');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(px, py, sz, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // ========== ミラーボール本体（虹色乱反射） ==========
   const projected = points.map(p => {
     const r = rotate(p, ry, rx);
-    const s = scale / (r.z + 2.8);
+    const s = scale / (r.z + 2.7);
     return {
       x: cx + r.x * s,
       y: cy + r.y * s,
       z: r.z,
       s,
-      phase: p.phase
+      phase: p.phase,
+      hueBias: p.hueBias
     };
   }).sort((a, b) => a.z - b.z);
 
   projected.forEach(p => {
-    if (p.z < -1.3) return;
+    if (p.z < -1.25) return;
 
-    // コントラストを極端に：暗い面はほぼ黒、明るい面は真っ白近く
-    const raw = Math.max(0, (p.z + 1.3) / 2.4);
-    const bright = Math.pow(raw, 1.8); // ガンマで暗い側をさらに落とす
-    const pulse = 0.65 + Math.sin(t * 3.2 + p.phase) * 0.35;
-    const size = (2.5 + p.s * 0.04) * pulse;
+    const raw = Math.max(0, (p.z + 1.25) / 2.35);
+    const bright = Math.pow(raw, 1.35);
+    const pulse = 0.7 + Math.sin(t * 3.5 + p.phase) * 0.3;
+    const size = (3.2 + p.s * 0.05) * pulse;
 
-    // 暗い面：ほぼ見えない
-    if (bright < 0.18) {
+    // 暗い面もわずかに色を残す
+    if (bright < 0.12) {
       ctx.beginPath();
-      ctx.arc(p.x, p.y, size * 0.7, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(20,25,45,${0.15 + bright * 0.3})`;
+      ctx.arc(p.x, p.y, size * 0.6, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(15,10,30,${0.2 + bright})`;
       ctx.fill();
       return;
     }
 
-    // 中間〜明るい面
-    const r = 30 + bright * 225;
-    const g = 40 + bright * 215;
-    const b = 80 + bright * 175;
-    const alpha = 0.2 + bright * 0.8;
+    // 乱反射による色：位置・時間・バイアスで虹色に変化
+    const hue = (p.hueBias + t * 55 + bright * 120 + p.phase * 40) % 360;
+    const sat = 55 + bright * 45;
+    const light = 35 + bright * 55;
+    const alpha = 0.35 + bright * 0.65;
 
     ctx.beginPath();
     ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(${r|0},${g|0},${b|0},${alpha})`;
+    ctx.fillStyle = `hsla(${hue}, ${sat}%, ${light}%, ${alpha})`;
     ctx.fill();
 
-    // 超ハイライト（鏡面反射の鋭い光）
-    if (bright > 0.55) {
-      const hl = (bright - 0.55) / 0.45;
+    // 鏡面ハイライト（白〜淡色）
+    if (bright > 0.4) {
+      const hl = (bright - 0.4) / 0.6;
+      const hlHue = (hue + 30) % 360;
       ctx.beginPath();
-      ctx.arc(p.x, p.y, size * (0.25 + hl * 0.35), 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(255,255,255,${0.5 + hl * 0.5})`;
+      ctx.arc(p.x, p.y, size * (0.3 + hl * 0.4), 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${hlHue}, 40%, 95%, ${0.5 + hl * 0.5})`;
       ctx.fill();
 
-      // さらに鋭いコア
-      if (hl > 0.6) {
+      if (hl > 0.5) {
         ctx.beginPath();
-        ctx.arc(p.x, p.y, size * 0.12, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255,255,255,${hl})`;
+        ctx.arc(p.x, p.y, size * 0.15, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${hl * 0.95})`;
         ctx.fill();
       }
     }
   });
 
-  // 中心の強いハイライト（暗い背景との対比）
-  const hg = ctx.createRadialGradient(cx, cy, 0, cx, cy, scale * 0.55);
-  hg.addColorStop(0, 'rgba(255,255,255,0.28)');
-  hg.addColorStop(0.25, 'rgba(200,215,255,0.12)');
-  hg.addColorStop(0.55, 'rgba(80,100,180,0.04)');
+  // ========== 中心の強い多色グロー ==========
+  const coreHue = (t * 40) % 360;
+  const hg = ctx.createRadialGradient(cx, cy, 0, cx, cy, scale * 0.7);
+  hg.addColorStop(0, `hsla(${coreHue}, 80%, 90%, 0.45)`);
+  hg.addColorStop(0.2, `hsla(${(coreHue + 60) % 360}, 85%, 75%, 0.28)`);
+  hg.addColorStop(0.45, `hsla(${(coreHue + 140) % 360}, 70%, 60%, 0.12)`);
+  hg.addColorStop(0.75, `hsla(${(coreHue + 220) % 360}, 60%, 50%, 0.04)`);
   hg.addColorStop(1, 'transparent');
   ctx.fillStyle = hg;
   ctx.beginPath();
-  ctx.arc(cx, cy, scale * 0.55, 0, Math.PI * 2);
+  ctx.arc(cx, cy, scale * 0.7, 0, Math.PI * 2);
   ctx.fill();
 
-  // ごく薄いスキャンライン（ほぼ黒の中に微かな構造）
-  ctx.strokeStyle = 'rgba(60,80,140,0.04)';
-  ctx.lineWidth = 1;
-  for (let i = 0; i < 6; i++) {
-    const y = cy + Math.sin(t * 0.45 + i * 1.1) * scale * 0.85;
+  // 追加のリング状ハイライト
+  for (let i = 0; i < 3; i++) {
+    const rr = scale * (0.35 + i * 0.15) * (0.9 + Math.sin(t * 2 + i) * 0.1);
     ctx.beginPath();
-    ctx.moveTo(cx - scale * 1.3, y);
-    ctx.lineTo(cx + scale * 1.3, y);
+    ctx.arc(cx, cy, rr, 0, Math.PI * 2);
+    ctx.strokeStyle = `hsla(${(coreHue + i * 80) % 360}, 90%, 80%, ${0.12 - i * 0.03})`;
+    ctx.lineWidth = 2 + i;
     ctx.stroke();
   }
 
