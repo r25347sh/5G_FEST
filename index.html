@@ -15,44 +15,71 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      gap: 0.5rem;
     }
     h1 {
       font-size: 3rem;
       letter-spacing: 0.2em;
       text-shadow: 0 0 20px #4a90ff, 0 0 40px #4a90ff55;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.3rem;
     }
-    p {
-      opacity: 0.8;
-      margin-bottom: 2rem;
+    .desc {
+      opacity: 0.75;
+      margin-bottom: 1.8rem;
+      font-size: 0.95rem;
     }
-    a {
+    .links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+    }
+    a.btn {
       display: inline-block;
-      padding: 1rem 2.5rem;
-      background: linear-gradient(90deg, #3a6fff, #6a4fff);
+      padding: 0.95rem 2.2rem;
       color: white;
       text-decoration: none;
       border-radius: 50px;
       font-weight: 600;
       letter-spacing: 0.05em;
-      box-shadow: 0 8px 25px rgba(74, 144, 255, 0.4);
       transition: transform 0.2s, box-shadow 0.2s;
     }
-    a:hover {
+    a.btn:hover {
       transform: translateY(-3px);
+    }
+    a.sample {
+      background: linear-gradient(90deg, #3a6fff, #6a4fff);
+      box-shadow: 0 8px 25px rgba(74, 144, 255, 0.4);
+    }
+    a.sample:hover {
       box-shadow: 0 12px 35px rgba(74, 144, 255, 0.6);
     }
+    a.deco {
+      background: linear-gradient(90deg, #8a2a5a, #c04080);
+      box-shadow: 0 8px 25px rgba(180, 50, 110, 0.35);
+    }
+    a.deco:hover {
+      box-shadow: 0 12px 35px rgba(180, 50, 110, 0.55);
+    }
     .note {
-      margin-top: 3rem;
-      font-size: 0.85rem;
-      opacity: 0.6;
+      margin-top: 2.8rem;
+      font-size: 0.82rem;
+      opacity: 0.55;
+      text-align: center;
+      line-height: 1.6;
     }
   </style>
 </head>
 <body>
   <h1>5G_FEST</h1>
-  <p>3D ピタゴラスイッチ サンプル</p>
-  <a href="sample/">▶ サンプルを開く</a>
-  <p class="note">物理法則に基づく本格的な3Dギミック連鎖です。<br>ブラウザで動作します（Three.js + Cannon.js）</p>
+  <p class="desc">サンプル & 画面デコレーション</p>
+  <div class="links">
+    <a class="btn sample" href="sample/">▶ 3Dピタゴラスイッチ</a>
+    <a class="btn deco" href="画面デコ/">✦ 画面デコ</a>
+  </div>
+  <p class="note">
+    ピタゴラスイッチ：物理法則ベースの3Dギミック連鎖<br>
+    画面デコ：天吊モニター向けフルスクリーンアニメ（ミラーボール / オペラピンク）
+  </p>
 </body>
 </html>
