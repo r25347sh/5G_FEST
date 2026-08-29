@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mirror Ball 02 改 — Experimental</title>
+  <style>
+    * { margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
+    canvas { display: block; width: 100%; height: 100%; }
+    #tag {
+      position: fixed; top: 10px; right: 14px; z-index: 10;
+      font: 600 11px/1 system-ui, sans-serif; letter-spacing: 0.12em;
+      color: rgba(255,255,255,0.35); pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+<div id="tag">MIRROR BALL 02 改 · EXP</div>
+<canvas id="c"></canvas>
+<script>
+/*
+  Mirror Ball 02 改 — 実験用・超演算版
+  天吊モニター前提。光量・色・密度・動きを振り切った版。
+  乱反射の虹色、多層光線、爆散フレア、回転コア、残像。
+*/
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+let W, H, cx, cy, t = 0;
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+  cx = W * 0.5; cy = H * 0.5;
+}
+window.addEventListener('resize', resize);
+resize();
+
+// ---------- 球のファセット（高密度） ----------
+const FACET_U = 36, FACET_V = 18;
+const facets = [];
+for (let i = 0; i < FACET_U; i++) {
+  for (let j = 0; j < FACET_V; j++) {
+    const theta = (j / FACET_V) * Math.PI;
+    const phi = (i / FACET_U) * Math.PI * 2;
+    facets.push({
+      x: Math.sin(theta) * Math.cos(phi),
+      y: Math.cos(theta),
+      z: Math.sin(theta) * Math.sin(phi),
+      hue0: (i * 17 + j * 41) % 360,
+      phase: Math.random() * Math.PI * 2,
+      sharp: 0.5 + Math.random() * 0.5
+    });
+  }
+}
+
+// ---------- 光線（多層・多色） ----------
+const beams = [];
+for (let i = 0; i < 42; i++) {
+  beams.push({
+    a: (i / 42) * Math.PI * 2,
+    spd: 0.0035 + (i % 7) * 0.0012,
+    w: 0.018 + (i % 5) * 0.012,
+    len: 0.5 + (i % 6) * 0.12,
+    hue: (i * 29) % 360,
+    layer: i % 3, // 0=奥 1=中 2=手前
+    pulseSpd: 1.5 + (i % 4) * 0.7
+  });
+}
+
+// ---------- きらめき粒子 ----------
+const sparks = [];
+for (let i = 0; i < 360; i++) {
+  sparks.push({
+    a: Math.random() * Math.PI * 2,
+    d: 0.1 + Math.random() * 2.6,
+    spd: 0.004 + Math.random() * 0.014,
+    r: 0.7 + Math.random() * 5,
+    hue: Math.random() * 360,
+    orbit: 0.6 + Math.random() * 0.8
+  });
+}
+
+// ---------- 爆散フレア（鋭い乱反射） ----------
+const flares = [];
+for (let i = 0; i < 55; i++) {
+  flares.push({
+    a: Math.random() * Math.PI * 2,
+    d: 0.3 + Math.random() * 1.9,
+    spd: 0.008 + Math.random() * 0.025,
+    r: 4 + Math.random() * 22,
+    hue: Math.random() * 360,
+    phase: Math.random() * Math.PI * 2,
+    lifeSpd: 2 + Math.random() * 3
+  });
+}
+
+// ---------- 回転する内側リング ----------
+const rings = [];
+for (let i = 0; i < 5; i++) {
+  rings.push({
+    r: 0.22 + i * 0.09,
+    spd: 0.4 + i * 0.15,
+    hue: i * 55,
+    w: 1.5 + i * 0.8,
+    dir: i % 2 === 0 ? 1 : -1
+  });
+}
+
+function rot3(x, y, z, ry, rx) {
+  const cy = Math.cos(ry), sy = Math.sin(ry);
+  let x1 = x * cy - z * sy;
+  let z1 = x * sy + z * cy;
+  const cx_ = Math.cos(rx), sx = Math.sin(rx);
+  let y1 = y * cx_ - z1 * sx;
+  let z2 = y * sx + z1 * cx_;
+  return { x: x1, y: y1, z: z2 };
+}
+
+function draw() {
+  t += 0.014;
+
+  // 残像を少し残しつつ黒へ
+  ctx.fillStyle = 'rgba(0,0,0,0.18)';
+  ctx.fillRect(0, 0, W, H);
+
+  const S = Math.min(W, H);
+  const scale = S * 0.34;
+  const ry = t * 0.48;
+  const rx = 0.32 + Math.sin(t * 0.22) * 0.2;
+
+  // ===== Layer 0: 奥光線 =====
+  beams.filter(b => b.layer === 0).forEach(b => {
+    b.a += b.spd;
+    const pulse = 0.65 + Math.sin(t * b.pulseSpd + b.a * 2) * 0.35;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(b.a);
+    const len = scale * 3.8 * b.len * pulse;
+    const h = (b.hue + t * 30) % 360;
+    const g = ctx.createLinearGradient(0, 0, 0, -len);
+    g.addColorStop(0, `hsla(${h},95%,70%,${0.1 * pulse})`);
+    g.addColorStop(0.4, `hsla(${(h+50)%360},80%,55%,${0.04 * pulse})`);
+    g.addColorStop(1, 'transparent');
+    ctx.fillStyle = g;
+    const w = scale * b.w;
+    ctx.beginPath();
+    ctx.moveTo(-w, 0); ctx.lineTo(w, 0);
+    ctx.lineTo(w * 6, -len); ctx.lineTo(-w * 6, -len);
+    ctx.fill();
+    ctx.restore();
+  });
+
+  // ===== ミラーボール本体 =====
+  const projected = facets.map(f => {
+    const r = rot3(f.x, f.y, f.z, ry, rx);
+    const s = scale / (r.z + 2.65);
+    return { x: cx + r.x * s, y: cy + r.y * s, z: r.z, s, hue0: f.hue0, phase: f.phase, sharp: f.sharp };
+  }).sort((a, b) => a.z - b.z);
+
+  projected.forEach(p => {
+    if (p.z < -1.2) return;
+    const raw = Math.max(0, (p.z + 1.2) / 2.3);
+    const bright = Math.pow(raw, 1.25);
+    const pulse = 0.75 + Math.sin(t * 3.8 + p.phase) * 0.25;
+    const size = (2.8 + p.s * 0.055) * pulse * p.sharp;
+
+    if (bright < 0.1) {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, size * 0.5, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(8,5,20,${0.25 + bright})`;
+      ctx.fill();
+      return;
+    }
+
+    // 虹色乱反射：角度・時間・固有色でフルスペクトル
+    const hue = (p.hue0 + t * 60 + bright * 140 + Math.sin(p.phase + t) * 40) % 360;
+    const sat = 50 + bright * 50;
+    const lit = 30 + bright * 58;
+    const alpha = 0.4 + bright * 0.6;
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(${hue},${sat}%,${lit}%,${alpha})`;
+    ctx.fill();
+
+    if (bright > 0.35) {
+      const hl = (bright - 0.35) / 0.65;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, size * (0.28 + hl * 0.45), 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${(hue + 25) % 360},35%,96%,${0.55 + hl * 0.45})`;
+      ctx.fill();
+      if (hl > 0.55) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, size * 0.12, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${hl})`;
+        ctx.fill();
+      }
+    }
+  });
+
+  // ===== 中層光線 =====
+  beams.filter(b => b.layer === 1).forEach(b => {
+    b.a += b.spd;
+    const pulse = 0.7 + Math.sin(t * b.pulseSpd + b.a * 3) * 0.3;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(b.a);
+    const len = scale * 3.5 * b.len * pulse;
+    const h = (b.hue + t * 35) % 360;
+    const g = ctx.createLinearGradient(0, 0, 0, -len);
+    g.addColorStop(0, `hsla(${h},95%,78%,${0.22 * pulse})`);
+    g.addColorStop(0.3, `hsla(${(h+45)%360},88%,65%,${0.12 * pulse})`);
+    g.addColorStop(0.7, `hsla(${(h+90)%360},70%,50%,${0.04})`);
+    g.addColorStop(1, 'transparent');
+    ctx.fillStyle = g;
+    const w = scale * b.w * 1.1;
+    ctx.beginPath();
+    ctx.moveTo(-w, 0); ctx.lineTo(w, 0);
+    ctx.lineTo(w * 5.5, -len); ctx.lineTo(-w * 5.5, -len);
+    ctx.fill();
+    ctx.restore();
+  });
+
+  // ===== きらめき粒子 =====
+  sparks.forEach(s => {
+    s.a += s.spd;
+    const px = cx + Math.cos(s.a + t * 0.2) * s.d * scale * 1.6 * s.orbit;
+    const py = cy + Math.sin(s.a * 0.85 + t * 0.16) * s.d * scale * 0.82 * s.orbit;
+    const flick = Math.sin(t * 5 + s.a * 6);
+    const a = 0.2 + Math.max(0, flick) * 0.8;
+    const r = s.r * (0.45 + Math.max(0, flick) * 1.2);
+    const h = (s.hue + t * 55) % 360;
+    ctx.beginPath();
+    ctx.arc(px, py, r, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(${h},90%,85%,${a})`;
+    ctx.fill();
+    if (flick > 0.5) {
+      ctx.beginPath();
+      ctx.arc(px, py, r * 0.35, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${flick * 0.9})`;
+      ctx.fill();
+    }
+  });
+
+  // ===== 爆散フレア =====
+  flares.forEach(f => {
+    f.a += f.spd * 0.12;
+    const life = 0.35 + Math.sin(t * f.lifeSpd + f.phase) * 0.65;
+    if (life < 0.25) return;
+    const px = cx + Math.cos(f.a + t * 0.35) * f.d * scale * 1.35;
+    const py = cy + Math.sin(f.a * 0.75 + t * 0.28) * f.d * scale * 0.72;
+    const h = (f.hue + t * 70) % 360;
+    const r = f.r * life;
+    const g = ctx.createRadialGradient(px, py, 0, px, py, r);
+    g.addColorStop(0, `hsla(${h},100%,92%,${0.7 * life})`);
+    g.addColorStop(0.3, `hsla(${(h+40)%360},95%,75%,${0.35 * life})`);
+    g.addColorStop(0.65, `hsla(${(h+90)%360},80%,55%,${0.1 * life})`);
+    g.addColorStop(1, 'transparent');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(px, py, r, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // ===== 手前光線 =====
+  beams.filter(b => b.layer === 2).forEach(b => {
+    b.a += b.spd * 1.15;
+    const pulse = 0.75 + Math.sin(t * b.pulseSpd * 1.2 + b.a * 4) * 0.25;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(b.a);
+    const len = scale * 3.2 * b.len * pulse;
+    const h = (b.hue + t * 45) % 360;
+    const g = ctx.createLinearGradient(0, 0, 0, -len);
+    g.addColorStop(0, `hsla(${h},100%,85%,${0.28 * pulse})`);
+    g.addColorStop(0.25, `hsla(${(h+35)%360},95%,70%,${0.15 * pulse})`);
+    g.addColorStop(0.6, `hsla(${(h+80)%360},75%,55%,${0.05})`);
+    g.addColorStop(1, 'transparent');
+    ctx.fillStyle = g;
+    const w = scale * b.w * 0.9;
+    ctx.beginPath();
+    ctx.moveTo(-w, 0); ctx.lineTo(w, 0);
+    ctx.lineTo(w * 4.5, -len); ctx.lineTo(-w * 4.5, -len);
+    ctx.fill();
+    ctx.restore();
+  });
+
+  // ===== 中心コア（多色・脈動） =====
+  const coreHue = (t * 55) % 360;
+  const coreR = scale * 0.72 * (0.92 + Math.sin(t * 1.1) * 0.08);
+  const cg = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreR);
+  cg.addColorStop(0, `hsla(${coreHue},90%,95%,0.55)`);
+  cg.addColorStop(0.15, `hsla(${(coreHue+50)%360},95%,80%,0.35)`);
+  cg.addColorStop(0.35, `hsla(${(coreHue+120)%360},85%,65%,0.18)`);
+  cg.addColorStop(0.6, `hsla(${(coreHue+200)%360},70%,50%,0.06)`);
+  cg.addColorStop(1, 'transparent');
+  ctx.fillStyle = cg;
+  ctx.beginPath();
+  ctx.arc(cx, cy, coreR, 0, Math.PI * 2);
+  ctx.fill();
+
+  // ===== 回転リング =====
+  rings.forEach(ring => {
+    const rr = scale * ring.r * (0.95 + Math.sin(t * 1.5 + ring.hue) * 0.05);
+    ctx.beginPath();
+    ctx.arc(cx, cy, rr, 0, Math.PI * 2);
+    ctx.strokeStyle = `hsla(${(ring.hue + t * 40 * ring.dir) % 360},90%,75%,0.18)`;
+    ctx.lineWidth = ring.w;
+    ctx.stroke();
+
+    // リング上の輝点
+    for (let k = 0; k < 6; k++) {
+      const ang = t * ring.spd * ring.dir + (k / 6) * Math.PI * 2;
+      const px = cx + Math.cos(ang) * rr;
+      const py = cy + Math.sin(ang) * rr;
+      ctx.beginPath();
+      ctx.arc(px, py, 2 + Math.sin(t * 3 + k) * 1.5, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${(ring.hue + k * 40 + t * 30) % 360},95%,90%,0.7)`;
+      ctx.fill();
+    }
+  });
+
+  // ===== 最前面の鋭いクロスハイライト =====
+  const crossA = t * 0.3;
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(crossA);
+  for (let i = 0; i < 4; i++) {
+    ctx.rotate(Math.PI / 2);
+    const g = ctx.createLinearGradient(0, 0, 0, -scale * 0.9);
+    g.addColorStop(0, 'rgba(255,255,255,0.35)');
+    g.addColorStop(0.3, 'rgba(255,255,255,0.08)');
+    g.addColorStop(1, 'transparent');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.moveTo(-3, 0); ctx.lineTo(3, 0);
+    ctx.lineTo(12, -scale * 0.9); ctx.lineTo(-12, -scale * 0.9);
+    ctx.fill();
+  }
+  ctx.restore();
+
+  requestAnimationFrame(draw);
+}
+draw();
+</script>
+</body>
+</html>

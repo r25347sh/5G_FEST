@@ -51,15 +51,21 @@
       transition: transform 0.2s, box-shadow 0.2s;
       border: 1px solid rgba(255,255,255,0.08);
     }
-    a.card:hover {
-      transform: translateY(-3px);
-    }
+    a.card:hover { transform: translateY(-3px); }
     .mirror a.card {
       background: linear-gradient(145deg, #12121a, #1a1a28);
     }
     .mirror a.card:hover {
       box-shadow: 0 8px 28px rgba(180, 200, 255, 0.25);
       border-color: rgba(180, 200, 255, 0.3);
+    }
+    .mirror a.card.kai {
+      background: linear-gradient(145deg, #1a1220, #2a1830);
+      border-color: rgba(255, 120, 180, 0.25);
+    }
+    .mirror a.card.kai:hover {
+      box-shadow: 0 8px 28px rgba(255, 100, 180, 0.35);
+      border-color: rgba(255, 140, 200, 0.45);
     }
     .opera a.card {
       background: linear-gradient(145deg, #120810, #1a0c14);
@@ -68,24 +74,20 @@
       box-shadow: 0 8px 28px rgba(200, 60, 120, 0.3);
       border-color: rgba(200, 80, 130, 0.35);
     }
-    .card strong {
-      display: block;
-      font-size: 1rem;
-      margin-bottom: 0.3rem;
+    .card strong { display: block; font-size: 1rem; margin-bottom: 0.3rem; }
+    .card span { font-size: 0.8rem; opacity: 0.65; }
+    .card .badge {
+      display: inline-block;
+      margin-top: 0.45rem;
+      padding: 0.15rem 0.5rem;
+      font-size: 0.68rem;
+      letter-spacing: 0.06em;
+      border-radius: 4px;
+      background: rgba(255,80,150,0.25);
+      color: #ffb0d0;
     }
-    .card span {
-      font-size: 0.8rem;
-      opacity: 0.65;
-    }
-    .back {
-      text-align: center;
-      margin-top: 2rem;
-    }
-    .back a {
-      color: #a090b0;
-      text-decoration: none;
-      font-size: 0.9rem;
-    }
+    .back { text-align: center; margin-top: 2rem; }
+    .back a { color: #a090b0; text-decoration: none; font-size: 0.9rem; }
     .back a:hover { color: #e0d0f0; }
   </style>
 </head>
@@ -94,7 +96,7 @@
   <p class="sub">天吊モニター・暗闇部屋向けフルスクリーンアニメーション</p>
 
   <section class="mirror">
-    <h2>ミラーボール風（3種）</h2>
+    <h2>ミラーボール風</h2>
     <div class="grid">
       <a class="card" href="mirrorball-1.html" target="_blank">
         <strong>Mirror Ball 01</strong>
@@ -103,6 +105,11 @@
       <a class="card" href="mirrorball-2.html" target="_blank">
         <strong>Mirror Ball 02</strong>
         <span>ファセット反射・きらめき粒子</span>
+      </a>
+      <a class="card kai" href="mirrorball-2-kai.html" target="_blank">
+        <strong>Mirror Ball 02 改</strong>
+        <span>実験用・超演算版（光量・虹色・多層）</span>
+        <div class="badge">EXP</div>
       </a>
       <a class="card" href="mirrorball-3.html" target="_blank">
         <strong>Mirror Ball 03</strong>
