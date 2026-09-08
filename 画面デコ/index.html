@@ -74,6 +74,14 @@
       box-shadow: 0 8px 28px rgba(200, 60, 120, 0.3);
       border-color: rgba(200, 80, 130, 0.35);
     }
+    .hack a.card {
+      background: linear-gradient(145deg, #0a0712, #120a1a);
+      border-color: rgba(255, 45, 149, 0.2);
+    }
+    .hack a.card:hover {
+      box-shadow: 0 8px 28px rgba(255, 45, 149, 0.35), 0 0 20px rgba(0, 245, 255, 0.12);
+      border-color: rgba(0, 245, 255, 0.4);
+    }
     .card strong { display: block; font-size: 1rem; margin-bottom: 0.3rem; }
     .card span { font-size: 0.8rem; opacity: 0.65; }
     .card .badge {
@@ -86,6 +94,10 @@
       background: rgba(255,80,150,0.25);
       color: #ffb0d0;
     }
+    .card .badge.cyan {
+      background: rgba(0, 245, 255, 0.18);
+      color: #9ef6ff;
+    }
     .back { text-align: center; margin-top: 2rem; }
     .back a { color: #a090b0; text-decoration: none; font-size: 0.9rem; }
     .back a:hover { color: #e0d0f0; }
@@ -93,7 +105,18 @@
 </head>
 <body>
   <h1>画面デコ</h1>
-  <p class="sub">天吊モニター・暗闇部屋向けフルスクリーンアニメーション</p>
+  <p class="sub">天吊モニター・闇閲部屋向けフルスクリーンアニメーション</p>
+
+  <section class="hack">
+    <h2>ハッカー風（5G-staff デザイン準拠）</h2>
+    <div class="grid">
+      <a class="card" href="hack/" target="_blank">
+        <strong>HACK · Terminal Loop</strong>
+        <span>超高速コード打ち込み・複数疑似ウィンドウ・無限ループ</span>
+        <div class="badge cyan">NEW</div>
+      </a>
+    </div>
+  </section>
 
   <section class="mirror">
     <h2>ミラーボール風</h2>
@@ -127,7 +150,7 @@
       </a>
       <a class="card" href="operapink-2.html" target="_blank">
         <strong>Opera Pink 02</strong>
-        <span>脈打つエーテルの球</span>
+        <span>脊打つエーテルの球</span>
       </a>
       <a class="card" href="operapink-3.html" target="_blank">
         <strong>Opera Pink 03</strong>
