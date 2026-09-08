@@ -7,20 +7,19 @@
 (function () {
   "use strict";
 
-  // ─── Code snippets pool (realistic, varied) ───────────────────────────────
   const SNIPPETS = {
     bash: [
       "nmap -sS -sV -O -T4 192.168.1.0/24 --open",
       "ssh -i ~/.ssh/id_ed25519 root@10.0.0.42 -p 2222",
-      "curl -s -X POST https://api.target.local/v1/auth -H 'Content-Type: application/json' -d '{\"user\":\"admin\",\"token\":\"...\"}'",
+      "curl -s -X POST https://api.target.local/v1/auth -H 'Content-Type: application/json'",
       "sudo tcpdump -i eth0 -nn -s0 -w capture.pcap port 443",
-      "find /var/log -name '*.log' -mtime -1 | xargs grep -i 'failed\\|error\\|breach'",
-      "python3 -c \"import socket; s=socket.socket(); s.connect(('10.0.0.1',22)); print(s.recv(1024))\"",
+      "find /var/log -name '*.log' -mtime -1 | xargs grep -i error",
+      "python3 -c \"import socket; s=socket.socket(); s.connect(('10.0.0.1',22))\"",
       "hashcat -m 0 -a 0 hashes.txt rockyou.txt --force",
       "docker exec -it $(docker ps -q --filter name=proxy) sh",
-      "git clone git@github.com:internal/recon.git && cd recon && ./run.sh --stealth",
+      "git clone git@github.com:internal/recon.git && cd recon && ./run.sh",
       "export PATH=$PATH:/opt/tools/bin; proxychains4 nmap -Pn 172.16.0.0/16",
-      "openssl s_client -connect target:443 -servername target 2>/dev/null | openssl x509 -noout -text",
+      "openssl s_client -connect target:443 -servername target 2>/dev/null",
       "journalctl -u sshd --since '1 hour ago' | grep -E 'Accepted|Failed'",
       "rsync -avz -e 'ssh -p 2222' ./payload/ root@10.0.0.88:/tmp/.x/",
       "echo '*/5 * * * * /usr/local/bin/beacon' | crontab -",
@@ -30,7 +29,7 @@
       "import requests, json, base64, hashlib",
       "from cryptography.fernet import Fernet",
       "session = requests.Session()",
-      "session.headers.update({'User-Agent': 'Mozilla/5.0', 'X-Forwarded-For': '127.0.0.1'})",
+      "session.headers.update({'User-Agent': 'Mozilla/5.0'})",
       "r = session.post(url, json=payload, timeout=8, verify=False)",
       "token = r.json().get('access_token')",
       "key = Fernet.generate_key()",
@@ -48,15 +47,14 @@
       "const res = await fetch('/api/v2/users', { method: 'GET', credentials: 'include' });",
       "const data = await res.json();",
       "localStorage.setItem('session', btoa(JSON.stringify(payload)));",
-      "document.cookie = `token=${jwt}; path=/; SameSite=None; Secure`;",
-      "WebSocket.prototype.send = new Proxy(WebSocket.prototype.send, { apply(t, thisArg, args) { console.log(args); return Reflect.apply(t, thisArg, args); }});",
+      "document.cookie = 'token=' + jwt + '; path=/; SameSite=None; Secure';",
       "const buffer = new Uint8Array(await crypto.subtle.digest('SHA-256', enc.encode(secret)));",
       "navigator.credentials.get({ publicKey: options }).then(assert);",
       "eval(atob(obfuscated));",
       "window.__REACT_DEVTOOLS_GLOBAL_HOOK__ = undefined;",
     ],
     log: [
-      "[INFO]  Connection established → 10.0.0.42:22",
+      "[INFO]  Connection established -> 10.0.0.42:22",
       "[OK]    Authentication successful (ed25519)",
       "[WARN]  Rate limit approaching (87/100)",
       "[+]     Privilege escalation: uid=0(root)",
@@ -65,18 +63,11 @@
       "[INFO]  Exfiltrating 2.4 MB via DNS tunnel",
       "[OK]    Persistence installed (systemd user unit)",
       "[*]     C2 beacon interval set to 45s",
-      "[ERROR] Connection reset by peer — retrying in 3s",
+      "[ERROR] Connection reset by peer - retrying in 3s",
       "[+]     Kernel exploit ready (CVE-2024-XXXX)",
       "[INFO]  Clearing audit logs ... done",
       "[OK]    Cover tracks complete",
       "[*]     Switching to passive mode",
-    ],
-    sql: [
-      "SELECT user, password_hash, last_login FROM accounts WHERE role='admin';",
-      "UPDATE sessions SET expires_at = NOW() + INTERVAL '30 days' WHERE token = $1;",
-      "INSERT INTO audit_log (actor, action, target) VALUES ('system', 'ACCESS', 'vault');",
-      "DROP TABLE IF EXISTS temp_recon;",
-      "GRANT ALL PRIVILEGES ON DATABASE ops TO 'svc_recon'@'%';",
     ],
     network: [
       "TRACE  1  192.168.0.1   0.4 ms",
@@ -85,75 +76,29 @@
       "SYN-ACK received from 10.0.0.88:443",
       "TLS handshake complete (TLS 1.3)",
       "Certificate: CN=*.internal.corp  (valid)",
-      "DNS: target.local → 10.0.0.42",
+      "DNS: target.local -> 10.0.0.42",
       "Packet loss: 0.0%  RTT: 4.2 ms",
     ],
   };
 
   const WINDOW_CONFIGS = [
-    {
-      id: "w1",
-      title: "root@ghost-01",
-      path: "~/ops",
-      badge: "ACTIVE",
-      badgeClass: "green",
-      tabs: ["shell", "nmap", "payload"],
-      activeTab: 0,
-      type: "bash",
-      secondary: false,
-      x: 4, y: 8, w: 42, h: 48,
-    },
-    {
-      id: "w2",
-      title: "python3",
-      path: "exploit.py",
-      badge: "RUN",
-      badgeClass: "",
-      tabs: ["exploit.py", "utils.py", "c2.py"],
-      activeTab: 0,
-      type: "python",
-      secondary: false,
-      x: 48, y: 6, w: 48, h: 42,
-    },
-    {
-      id: "w3",
-      title: "tcpdump",
-      path: "eth0",
-      badge: "LIVE",
-      badgeClass: "cyan",
-      tabs: ["capture", "filter", "stats"],
-      activeTab: 0,
-      type: "network",
-      secondary: true,
-      x: 52, y: 52, w: 44, h: 36,
-    },
-    {
-      id: "w4",
-      title: "logs",
-      path: "/var/log/ops",
-      badge: "TAIL",
-      badgeClass: "green",
-      tabs: ["auth.log", "kern.log", "audit"],
-      activeTab: 0,
-      type: "log",
-      secondary: true,
-      x: 3, y: 58, w: 46, h: 32,
-    },
-    {
-      id: "w5",
-      title: "node",
-      path: "injector.js",
-      badge: "HOOK",
-      badgeClass: "",
-      tabs: ["injector.js", "ws.js"],
-      activeTab: 0,
-      type: "js",
-      secondary: false,
-      x: 28, y: 28, w: 38, h: 34,
-    },
+    { id: "w1", title: "root@ghost-01", path: "~/ops", badge: "ACTIVE", badgeClass: "green",
+      tabs: ["shell", "nmap", "payload"], activeTab: 0, type: "bash", secondary: false,
+      x: 4, y: 8, w: 42, h: 48 },
+    { id: "w2", title: "python3", path: "exploit.py", badge: "RUN", badgeClass: "",
+      tabs: ["exploit.py", "utils.py", "c2.py"], activeTab: 0, type: "python", secondary: false,
+      x: 48, y: 6, w: 48, h: 42 },
+    { id: "w3", title: "tcpdump", path: "eth0", badge: "LIVE", badgeClass: "cyan",
+      tabs: ["capture", "filter", "stats"], activeTab: 0, type: "network", secondary: true,
+      x: 52, y: 52, w: 44, h: 36 },
+    { id: "w4", title: "logs", path: "/var/log/ops", badge: "TAIL", badgeClass: "green",
+      tabs: ["auth.log", "kern.log", "audit"], activeTab: 0, type: "log", secondary: true,
+      x: 3, y: 58, w: 46, h: 32 },
+    { id: "w5", title: "node", path: "injector.js", badge: "HOOK", badgeClass: "",
+      tabs: ["injector.js", "ws.js"], activeTab: 0, type: "js", secondary: false,
+      x: 28, y: 28, w: 38, h: 34 },
   ];
 
-  // ─── State ────────────────────────────────────────────────────────
   const state = {
     windows: {},
     activeId: "w1",
@@ -163,75 +108,42 @@
     threat: "LOW",
   };
 
-  // ─── DOM helpers ──────────────────────────────────────────────────────
   function $(sel, ctx) {
     return (ctx || document).querySelector(sel);
   }
-  function $$(sel, ctx) {
-    return Array.from((ctx || document).querySelectorAll(sel));
-  }
 
-  function createWindow(cfg) {
-    const el = document.createElement("div");
-    el.className = "window" + (cfg.secondary ? " secondary" : "") + (cfg.id === state.activeId ? " active glow" : "");
-    el.id = cfg.id;
-    el.style.left = cfg.x + "%";
-    el.style.top = cfg.y + "%";
-    el.style.width = cfg.w + "%";
-    el.style.height = cfg.h + "%";
-    el.style.zIndex = cfg.id === state.activeId ? 40 : 10 + Math.floor(Math.random() * 10);
-
-    el.innerHTML = `
-      <div class="title-bar">
-        <div class="traffic"><span class="close"></span><span class="min"></span><span class="max"></span></div>
-        <div class="title">${cfg.title} <span class="path">· ${cfg.path}</span></div>
-        <span class="badge ${cfg.badgeClass || ""}">${cfg.badge}</span>
-      </div>
-      <div class="tabs">
-        ${cfg.tabs.map((t, i) => `<div class="tab ${i === cfg.activeTab ? "active" : ""} ${cfg.secondary ? "cyan-active" : ""}">${t}</div>`).join("")}
-      </div>
-      <div class="term-body"><pre class="output"></pre></div>
-    `;
-
-    $(".stage").appendChild(el);
-    state.windows[cfg.id] = {
-      el,
-      cfg,
-      lines: [],
-      maxLines: Math.floor((cfg.h / 100) * window.innerHeight / 18) - 4,
-      typing: false,
-    };
-    return el;
-  }
-
-  function setActive(id) {
-    state.activeId = id;
-    Object.keys(state.windows).forEach((wid) => {
-      const w = state.windows[wid];
-      w.el.classList.toggle("active", wid === id);
-      w.el.classList.toggle("glow", wid === id);
-      w.el.style.zIndex = wid === id ? 45 : 10 + Math.floor(Math.random() * 15);
-    });
-  }
-
-  // ─── Typing engine ─────────────────────────────────────────────────
   function randomFrom(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
   }
 
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, "&")
+      .replace(/</g, "<")
+      .replace(/>/g, ">")
+      .replace(/"/g, """);
+  }
+
   function colorize(line, type) {
     if (type === "log") {
-      if (line.includes("[OK]") || line.includes("[+]")) return `<span class="success">${escapeHtml(line)}</span>`;
-      if (line.includes("[ERROR]")) return `<span class="error">${escapeHtml(line)}</span>`;
-      if (line.includes("[WARN]")) return `<span class="warn">${escapeHtml(line)}</span>`;
-      if (line.includes("[INFO]") || line.includes("[*]")) return `<span class="dim">${escapeHtml(line)}</span>`;
+      if (line.indexOf("[OK]") !== -1 || line.indexOf("[+]") !== -1) {
+        return '<span class="success">' + escapeHtml(line) + "</span>";
+      }
+      if (line.indexOf("[ERROR]") !== -1) {
+        return '<span class="error">' + escapeHtml(line) + "</span>";
+      }
+      if (line.indexOf("[WARN]") !== -1) {
+        return '<span class="warn">' + escapeHtml(line) + "</span>";
+      }
+      if (line.indexOf("[INFO]") !== -1 || line.indexOf("[*]") !== -1) {
+        return '<span class="dim">' + escapeHtml(line) + "</span>";
+      }
       return escapeHtml(line);
     }
     if (type === "network") {
-      return `<span class="dim">${escapeHtml(line)}</span>`;
+      return '<span class="dim">' + escapeHtml(line) + "</span>";
     }
-    // simple syntax highlight for code-ish lines
-    let s = escapeHtml(line);
+    var s = escapeHtml(line);
     s = s.replace(/\b(import|from|const|let|var|function|def|async|await|return|if|else|for|while|class|export|SELECT|UPDATE|INSERT|DROP|GRANT)\b/g, '<span class="keyword">$1</span>');
     s = s.replace(/(['"`])(?:(?!\1)[^\\]|\\.)*\1/g, '<span class="string">$&</span>');
     s = s.replace(/\b(\d+\.?\d*)\b/g, '<span class="number">$1</span>');
@@ -239,57 +151,123 @@
     return s;
   }
 
-  function escapeHtml(str) {
-    return str
-      .replace(/&/g, "&")
-      .replace(/</g, "<")
-      .replace(/>/g, ">")
-      .replace(/"/g, """);
+  function createWindow(cfg) {
+    var el = document.createElement("div");
+    var isActive = cfg.id === state.activeId;
+    el.className = "window" + (cfg.secondary ? " secondary" : "") + (isActive ? " active glow" : "");
+    el.id = cfg.id;
+    el.style.left = cfg.x + "%";
+    el.style.top = cfg.y + "%";
+    el.style.width = cfg.w + "%";
+    el.style.height = cfg.h + "%";
+    el.style.zIndex = isActive ? "40" : String(10 + Math.floor(Math.random() * 10));
+
+    var tabsHtml = "";
+    for (var i = 0; i < cfg.tabs.length; i++) {
+      var activeCls = i === cfg.activeTab ? " active" : "";
+      var cyanCls = cfg.secondary ? " cyan-active" : "";
+      tabsHtml += '<div class="tab' + activeCls + cyanCls + '">' + cfg.tabs[i] + "</div>";
+    }
+
+    el.innerHTML =
+      '<div class="title-bar">' +
+      '<div class="traffic"><span class="close"></span><span class="min"></span><span class="max"></span></div>' +
+      '<div class="title">' + cfg.title + ' <span class="path">· ' + cfg.path + "</span></div>" +
+      '<span class="badge ' + (cfg.badgeClass || "") + '">' + cfg.badge + "</span>" +
+      "</div>" +
+      '<div class="tabs">' + tabsHtml + "</div>" +
+      '<div class="term-body"><pre class="output"></pre></div>';
+
+    var stage = $(".stage");
+    if (stage) stage.appendChild(el);
+
+    var maxLines = Math.max(8, Math.floor((cfg.h / 100) * (window.innerHeight || 800) / 18) - 4);
+    state.windows[cfg.id] = {
+      el: el,
+      cfg: cfg,
+      lines: [],
+      maxLines: maxLines,
+      typing: false,
+    };
+    return el;
+  }
+
+  function setActive(id) {
+    state.activeId = id;
+    var ids = Object.keys(state.windows);
+    for (var i = 0; i < ids.length; i++) {
+      var wid = ids[i];
+      var w = state.windows[wid];
+      if (!w || !w.el) continue;
+      if (wid === id) {
+        w.el.classList.add("active", "glow");
+        w.el.style.zIndex = "45";
+      } else {
+        w.el.classList.remove("active", "glow");
+        w.el.style.zIndex = String(10 + Math.floor(Math.random() * 15));
+      }
+    }
+  }
+
+  function renderOutput(w) {
+    if (!w || !w.el) return;
+    var pre = w.el.querySelector(".output");
+    if (!pre) return;
+    var promptClass = w.cfg.secondary ? "prompt-cyan" : "prompt";
+    var cursorCls = w.cfg.secondary ? "cursor" : "cursor pink";
+    var html = w.lines.join("\n");
+    if (!w.typing) {
+      html += "\n<span class=\"" + promptClass + "\">$</span> <span class=\"" + cursorCls + "\"></span>";
+    }
+    pre.innerHTML = html;
   }
 
   function appendLine(winId, htmlLine, withPrompt) {
-    const w = state.windows[winId];
+    var w = state.windows[winId];
     if (!w) return;
-    const pre = w.el.querySelector(".output");
-    const promptClass = w.cfg.secondary ? "prompt-cyan" : "prompt";
-    const prompt = withPrompt
-      ? `<span class="${promptClass}">$</span> `
-      : "";
+    var promptClass = w.cfg.secondary ? "prompt-cyan" : "prompt";
+    var prompt = withPrompt ? '<span class="' + promptClass + '">$</span> ' : "";
     w.lines.push(prompt + htmlLine);
     if (w.lines.length > w.maxLines) {
       w.lines = w.lines.slice(-w.maxLines);
     }
-    pre.innerHTML = w.lines.join("\n") + (w.typing ? "" : `\n<span class="${promptClass}">$</span> <span class="cursor ${w.cfg.secondary ? "" : "pink"}"></span>`);
+    renderOutput(w);
   }
 
-  function typeLine(winId, text, type, speed = 8) {
-    return new Promise((resolve) => {
-      const w = state.windows[winId];
-      if (!w) return resolve();
+  function typeLine(winId, text, type, speed) {
+    speed = typeof speed === "number" ? speed : 8;
+    return new Promise(function (resolve) {
+      var w = state.windows[winId];
+      if (!w) {
+        resolve();
+        return;
+      }
       w.typing = true;
-      const pre = w.el.querySelector(".output");
-      const promptClass = w.cfg.secondary ? "prompt-cyan" : "prompt";
-      let i = 0;
-      const base = w.lines.slice();
-      const colored = colorize(text, type);
+      var pre = w.el.querySelector(".output");
+      var promptClass = w.cfg.secondary ? "prompt-cyan" : "prompt";
+      var cursorCls = w.cfg.secondary ? "cursor" : "cursor pink";
+      var i = 0;
+      var base = w.lines.slice();
+      var colored = colorize(text, type);
 
       if (speed < 4) {
         appendLine(winId, colored, true);
         w.typing = false;
-        return resolve();
+        resolve();
+        return;
       }
 
       function step() {
         i++;
-        const partial = escapeHtml(text.slice(0, i));
-        const lines = base.concat([
-          `<span class="${promptClass}">$</span> <span class="cmd">${partial}</span><span class="cursor ${w.cfg.secondary ? "" : "pink"}"></span>`,
+        var partial = escapeHtml(text.slice(0, i));
+        var lines = base.concat([
+          '<span class="' + promptClass + '">$</span> <span class="cmd">' + partial + '</span><span class="' + cursorCls + '"></span>',
         ]);
-        pre.innerHTML = lines.join("\n");
+        if (pre) pre.innerHTML = lines.join("\n");
         if (i >= text.length) {
-          w.lines = base.concat([`<span class="${promptClass}">$</span> ${colored}`]);
+          w.lines = base.concat(['<span class="' + promptClass + '">$</span> ' + colored]);
           w.typing = false;
-          pre.innerHTML = w.lines.join("\n") + `\n<span class="${promptClass}">$</span> <span class="cursor ${w.cfg.secondary ? "" : "pink"}"></span>`;
+          renderOutput(w);
           resolve();
         } else {
           setTimeout(step, speed + Math.random() * 4);
@@ -299,63 +277,81 @@
     });
   }
 
-  async function runSequence(winId) {
-    const w = state.windows[winId];
-    if (!w) return;
-    const type = w.cfg.type;
-    const pool = SNIPPETS[type] || SNIPPETS.bash;
-
-    while (true) {
-      if (Math.random() > 0.35) {
-        const cmd = randomFrom(pool);
-        const speed = type === "log" || type === "network" ? 2 : 5 + Math.random() * 9;
-        await typeLine(winId, cmd, type, speed);
-        await sleep(80 + Math.random() * 220);
-      } else {
-        const burst = 2 + Math.floor(Math.random() * 4);
-        for (let b = 0; b < burst; b++) {
-          const line = randomFrom(pool);
-          appendLine(winId, colorize(line, type), type !== "log" && type !== "network");
-          await sleep(30 + Math.random() * 50);
-        }
-        await sleep(120 + Math.random() * 300);
-      }
-
-      if (w.lines.length > w.maxLines - 2 && Math.random() > 0.7) {
-        w.lines = w.lines.slice(-Math.floor(w.maxLines * 0.4));
-      }
-    }
-  }
-
   function sleep(ms) {
-    return new Promise((r) => setTimeout(r, ms));
+    return new Promise(function (r) {
+      setTimeout(r, ms);
+    });
   }
 
-  // ─── Matrix rain ────────────────────────────────────────────────────
+  function runSequence(winId) {
+    var w = state.windows[winId];
+    if (!w) return;
+    var type = w.cfg.type;
+    var pool = SNIPPETS[type] || SNIPPETS.bash;
+
+    function loop() {
+      var p;
+      if (Math.random() > 0.35) {
+        var cmd = randomFrom(pool);
+        var speed = type === "log" || type === "network" ? 2 : 5 + Math.random() * 9;
+        p = typeLine(winId, cmd, type, speed).then(function () {
+          return sleep(80 + Math.random() * 220);
+        });
+      } else {
+        p = Promise.resolve();
+        var burst = 2 + Math.floor(Math.random() * 4);
+        var b = 0;
+        function nextBurst() {
+          if (b >= burst) {
+            return sleep(120 + Math.random() * 300);
+          }
+          var line = randomFrom(pool);
+          appendLine(winId, colorize(line, type), type !== "log" && type !== "network");
+          b++;
+          return sleep(30 + Math.random() * 50).then(nextBurst);
+        }
+        p = nextBurst();
+      }
+
+      p.then(function () {
+        if (w.lines.length > w.maxLines - 2 && Math.random() > 0.7) {
+          w.lines = w.lines.slice(-Math.floor(w.maxLines * 0.4));
+        }
+        loop();
+      }).catch(function (err) {
+        console.error("runSequence error", winId, err);
+        setTimeout(loop, 500);
+      });
+    }
+
+    loop();
+  }
+
   function initMatrix() {
-    const canvas = document.getElementById("matrix-canvas");
+    var canvas = document.getElementById("matrix-canvas");
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    let w, h, cols, drops;
-    const chars = "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン01アカサタナハマヤラワ";
+    var ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    var w, h, cols, drops;
+    var chars = "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン01";
 
     function resize() {
-      w = canvas.width = window.innerWidth;
-      h = canvas.height = window.innerHeight;
-      cols = Math.floor(w / 16);
-      drops = Array(cols).fill(1);
+      w = canvas.width = window.innerWidth || 800;
+      h = canvas.height = window.innerHeight || 600;
+      cols = Math.floor(w / 16) || 40;
+      drops = [];
+      for (var i = 0; i < cols; i++) drops[i] = 1;
     }
 
     function draw() {
       ctx.fillStyle = "rgba(7, 5, 15, 0.08)";
       ctx.fillRect(0, 0, w, h);
       ctx.font = "13px monospace";
-      for (let i = 0; i < drops.length; i++) {
-        const ch = chars[Math.floor(Math.random() * chars.length)];
-        const x = i * 16;
-        const y = drops[i] * 16;
-        const grad = Math.random() > 0.92;
-        ctx.fillStyle = grad ? "#00f5ff" : "rgba(0, 245, 255, 0.35)";
+      for (var i = 0; i < drops.length; i++) {
+        var ch = chars[Math.floor(Math.random() * chars.length)];
+        var x = i * 16;
+        var y = drops[i] * 16;
+        ctx.fillStyle = Math.random() > 0.92 ? "#00f5ff" : "rgba(0, 245, 255, 0.35)";
         ctx.fillText(ch, x, y);
         if (y > h && Math.random() > 0.975) drops[i] = 0;
         drops[i]++;
@@ -368,15 +364,14 @@
     draw();
   }
 
-  // ─── Ambient particles ──────────────────────────────────────────────
   function spawnParticles() {
-    const container = $(".ambient");
+    var container = $(".ambient");
     if (!container) return;
-    const colors = ["pink", "cyan", "gold", "green"];
-    for (let i = 0; i < 28; i++) {
-      const p = document.createElement("div");
+    var colors = ["pink", "cyan", "gold", "green"];
+    for (var i = 0; i < 28; i++) {
+      var p = document.createElement("div");
       p.className = "ambient-particle " + randomFrom(colors);
-      const size = 2 + Math.random() * 4;
+      var size = 2 + Math.random() * 4;
       p.style.width = size + "px";
       p.style.height = size + "px";
       p.style.left = Math.random() * 100 + "%";
@@ -386,7 +381,6 @@
     }
   }
 
-  // ─── HUD updates ───────────────────────────────────────────────────
   function updateHud() {
     state.packets += Math.floor(Math.random() * 40) + 8;
     state.bytes += Math.floor(Math.random() * 12000) + 2000;
@@ -395,81 +389,102 @@
       state.threat = randomFrom(["LOW", "MED", "HIGH", "CRIT"]);
     }
 
-    const pkt = $("#hud-packets");
-    const byt = $("#hud-bytes");
-    const ses = $("#hud-sessions");
-    const thr = $("#hud-threat");
-    const clk = $("#hud-clock");
+    var pkt = document.getElementById("hud-packets");
+    var byt = document.getElementById("hud-bytes");
+    var ses = document.getElementById("hud-sessions");
+    var thr = document.getElementById("hud-threat");
+    var clk = document.getElementById("hud-clock");
 
     if (pkt) pkt.textContent = state.packets.toLocaleString();
     if (byt) byt.textContent = (state.bytes / 1024).toFixed(1) + " KB";
-    if (ses) ses.textContent = state.sessions;
+    if (ses) ses.textContent = String(state.sessions);
     if (thr) {
       thr.textContent = state.threat;
       thr.className = "val" + (state.threat === "HIGH" || state.threat === "CRIT" ? " val-pink" : "");
     }
     if (clk) {
-      const now = new Date();
+      var now = new Date();
       clk.textContent = now.toTimeString().slice(0, 8);
     }
   }
 
-  // ─── Toast ────────────────────────────────────────────────────────
   function showToast(title, body) {
-    const t = $("#toast");
+    var t = document.getElementById("toast");
     if (!t) return;
-    t.querySelector(".toast-title").textContent = title;
-    t.querySelector(".toast-body").textContent = body;
+    var titleEl = t.querySelector(".toast-title");
+    var bodyEl = t.querySelector(".toast-body");
+    if (titleEl) titleEl.textContent = title;
+    if (bodyEl) bodyEl.textContent = body;
     t.classList.add("show");
-    setTimeout(() => t.classList.remove("show"), 3200);
+    setTimeout(function () {
+      t.classList.remove("show");
+    }, 3200);
   }
 
-  // ─── Window focus rotation ─────────────────────────────────────────
   function rotateFocus() {
-    const ids = Object.keys(state.windows);
-    const next = randomFrom(ids);
+    var ids = Object.keys(state.windows);
+    if (!ids.length) return;
+    var next = randomFrom(ids);
     setActive(next);
   }
 
-  // ─── Boot sequence ────────────────────────────────────────────────
-  async function boot() {
-    WINDOW_CONFIGS.forEach(createWindow);
-
-    Object.keys(state.windows).forEach((id) => {
-      state.windows[id].el.addEventListener("mousedown", () => setActive(id));
-    });
-
-    initMatrix();
-    spawnParticles();
-
-    WINDOW_CONFIGS.forEach((cfg, i) => {
-      setTimeout(() => runSequence(cfg.id), 400 + i * 600);
-    });
-
-    setInterval(updateHud, 400);
-    updateHud();
-
-    setInterval(rotateFocus, 7000 + Math.random() * 4000);
-
-    const toastMessages = [
-      ["INTRUSION DETECTED", "Unauthorized probe from 203.0.113.44 blocked"],
-      ["C2 BEACON", "Callback received · session #4 established"],
-      ["EXFIL COMPLETE", "2.4 MB transferred via DNS"],
-      ["PRIV ESC", "uid=0 obtained on ghost-01"],
-      ["PERSISTENCE", "systemd unit installed successfully"],
-      ["COVER TRACKS", "auditd logs rotated and wiped"],
-    ];
-    setInterval(() => {
-      if (Math.random() > 0.55) {
-        const m = randomFrom(toastMessages);
-        showToast(m[0], m[1]);
+  function boot() {
+    try {
+      for (var i = 0; i < WINDOW_CONFIGS.length; i++) {
+        createWindow(WINDOW_CONFIGS[i]);
       }
-    }, 9000);
 
-    setTimeout(() => showToast("SYSTEM ONLINE", "Multi-session recon active · stealth mode"), 1800);
+      var ids = Object.keys(state.windows);
+      for (var j = 0; j < ids.length; j++) {
+        (function (id) {
+          var w = state.windows[id];
+          if (w && w.el) {
+            w.el.addEventListener("mousedown", function () {
+              setActive(id);
+            });
+          }
+        })(ids[j]);
+      }
+
+      initMatrix();
+      spawnParticles();
+
+      for (var k = 0; k < WINDOW_CONFIGS.length; k++) {
+        (function (cfg, delay) {
+          setTimeout(function () {
+            runSequence(cfg.id);
+          }, delay);
+        })(WINDOW_CONFIGS[k], 400 + k * 600);
+      }
+
+      setInterval(updateHud, 400);
+      updateHud();
+
+      setInterval(rotateFocus, 7000 + Math.random() * 4000);
+
+      var toastMessages = [
+        ["INTRUSION DETECTED", "Unauthorized probe from 203.0.113.44 blocked"],
+        ["C2 BEACON", "Callback received · session #4 established"],
+        ["EXFIL COMPLETE", "2.4 MB transferred via DNS"],
+        ["PRIV ESC", "uid=0 obtained on ghost-01"],
+        ["PERSISTENCE", "systemd unit installed successfully"],
+        ["COVER TRACKS", "auditd logs rotated and wiped"],
+      ];
+      setInterval(function () {
+        if (Math.random() > 0.55) {
+          var m = randomFrom(toastMessages);
+          showToast(m[0], m[1]);
+        }
+      }, 9000);
+
+      setTimeout(function () {
+        showToast("SYSTEM ONLINE", "Multi-session recon active · stealth mode");
+      }, 1800);
+    } catch (err) {
+      console.error("boot failed", err);
+    }
   }
 
-  // ─── Init ─────────────────────────────────────────────────────────
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", boot);
   } else {
