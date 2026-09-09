@@ -14,6 +14,7 @@
   --gold: #ffd700;
   --purple: #9b5de5;
   --green: #39ff14;
+  --red: #ff3355;
   --text: #f5f0ff;
   --text-muted: rgba(245, 240, 255, 0.58);
   --border: rgba(255, 255, 255, 0.1);
@@ -105,6 +106,10 @@ body::after {
   background: var(--green);
   box-shadow: 0 0 8px rgba(57, 255, 20, 0.45);
 }
+.ambient-particle.red {
+  background: var(--red);
+  box-shadow: 0 0 10px rgba(255, 51, 85, 0.55);
+}
 
 @keyframes float-up {
   0%   { transform: translate3d(0, 0, 0) scale(1); opacity: 0; }
@@ -167,6 +172,17 @@ body::after {
   animation: pulse-dot 1.6s ease-in-out infinite;
 }
 
+.status-bar.alert-mode {
+  border-bottom-color: rgba(255, 51, 85, 0.7);
+  background: rgba(28, 6, 12, 0.95);
+}
+
+.status-bar.alert-mode .dot {
+  background: var(--red);
+  box-shadow: 0 0 10px var(--red);
+  animation: pulse-dot 0.5s ease-in-out infinite;
+}
+
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.45; transform: scale(0.85); }
@@ -179,6 +195,17 @@ body::after {
 
 .status-bar .label-warn {
   color: var(--pink);
+}
+
+.status-bar .label-crit {
+  color: var(--red);
+  text-shadow: 0 0 10px rgba(255, 51, 85, 0.7);
+  animation: blink-text 0.6s step-end infinite;
+}
+
+@keyframes blink-text {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
 }
 
 /* Bottom HUD */
@@ -212,6 +239,11 @@ body::after {
   color: var(--pink);
 }
 
+.hud-bottom .val-red {
+  color: var(--red);
+  text-shadow: 0 0 6px rgba(255, 51, 85, 0.5);
+}
+
 /* Brand watermark */
 .brand {
   position: absolute;
@@ -223,4 +255,59 @@ body::after {
   color: rgba(255, 45, 149, 0.35);
   z-index: 50;
   pointer-events: none;
+}
+
+/* Critical overlay */
+.crit-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(8, 0, 4, 0.72);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.crit-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.crit-box {
+  border: 2px solid var(--red);
+  background: rgba(18, 4, 10, 0.95);
+  padding: 28px 40px;
+  max-width: 640px;
+  text-align: center;
+  box-shadow:
+    0 0 40px rgba(255, 51, 85, 0.35),
+    0 0 80px rgba(255, 45, 149, 0.15),
+    inset 0 0 30px rgba(255, 51, 85, 0.08);
+  animation: crit-pulse 1.2s ease-in-out infinite;
+}
+
+.crit-title {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--red);
+  letter-spacing: 0.08em;
+  text-shadow: 0 0 16px rgba(255, 51, 85, 0.7);
+  margin-bottom: 14px;
+}
+
+.crit-body {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.7;
+  color: #ffc8d0;
+  white-space: pre-wrap;
+}
+
+@keyframes crit-pulse {
+  0%, 100% { box-shadow: 0 0 40px rgba(255, 51, 85, 0.35), 0 0 80px rgba(255, 45, 149, 0.15); }
+  50% { box-shadow: 0 0 60px rgba(255, 51, 85, 0.55), 0 0 100px rgba(255, 45, 149, 0.25); }
 }
