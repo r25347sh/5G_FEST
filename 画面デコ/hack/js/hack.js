@@ -1,111 +1,136 @@
 /**
- * 画面デコ - Hacker Terminal Animation Engine
- * Infinite loop · Ultra-fast typing · Multi-window
+ * 画面デコ - ShadowScript Hacker Terminal Engine
+ * Scripted narrative + high-speed auto typing + multi-window
  * Design language: 5G-staff (pink / cyan / gold / deep purple)
+ *
+ * ShadowScript (fictional):
+ *   - Keywords: shadow, pierce, inject, spoof, loop, bind, route, nullify
+ *   - Blocks: #shadow { ... }  ::overdrive  @target
+ *   - Ops: ->  ~>  ||>  <<  ===  ??
  */
 
 (function () {
   "use strict";
 
-  const SNIPPETS = {
-    bash: [
-      "nmap -sS -sV -O -T4 192.168.1.0/24 --open",
-      "ssh -i ~/.ssh/id_ed25519 root@10.0.0.42 -p 2222",
-      "curl -s -X POST https://api.target.local/v1/auth -H 'Content-Type: application/json'",
-      "sudo tcpdump -i eth0 -nn -s0 -w capture.pcap port 443",
-      "find /var/log -name '*.log' -mtime -1 | xargs grep -i error",
-      "python3 -c \"import socket; s=socket.socket(); s.connect(('10.0.0.1',22))\"",
-      "hashcat -m 0 -a 0 hashes.txt rockyou.txt --force",
-      "docker exec -it $(docker ps -q --filter name=proxy) sh",
-      "git clone git@github.com:internal/recon.git && cd recon && ./run.sh",
-      "export PATH=$PATH:/opt/tools/bin; proxychains4 nmap -Pn 172.16.0.0/16",
-      "openssl s_client -connect target:443 -servername target 2>/dev/null",
-      "journalctl -u sshd --since '1 hour ago' | grep -E 'Accepted|Failed'",
-      "rsync -avz -e 'ssh -p 2222' ./payload/ root@10.0.0.88:/tmp/.x/",
-      "echo '*/5 * * * * /usr/local/bin/beacon' | crontab -",
-      "iptables -A INPUT -s 203.0.113.0/24 -j DROP && iptables-save",
-    ],
-    python: [
-      "import requests, json, base64, hashlib",
-      "from cryptography.fernet import Fernet",
-      "session = requests.Session()",
-      "session.headers.update({'User-Agent': 'Mozilla/5.0'})",
-      "r = session.post(url, json=payload, timeout=8, verify=False)",
-      "token = r.json().get('access_token')",
-      "key = Fernet.generate_key()",
-      "cipher = Fernet(key)",
-      "encrypted = cipher.encrypt(data.encode())",
-      "def exploit(target, port=443):",
-      "    sock = socket.create_connection((target, port), timeout=5)",
-      "    sock.send(payload)",
-      "    return sock.recv(4096)",
-      "hashes = [hashlib.sha256(x.encode()).hexdigest() for x in wordlist]",
-      "print(f'[+] Extracted {len(creds)} credentials')",
-      "asyncio.run(main())",
-    ],
-    js: [
-      "const res = await fetch('/api/v2/users', { method: 'GET', credentials: 'include' });",
-      "const data = await res.json();",
-      "localStorage.setItem('session', btoa(JSON.stringify(payload)));",
-      "document.cookie = 'token=' + jwt + '; path=/; SameSite=None; Secure';",
-      "const buffer = new Uint8Array(await crypto.subtle.digest('SHA-256', enc.encode(secret)));",
-      "navigator.credentials.get({ publicKey: options }).then(assert);",
-      "eval(atob(obfuscated));",
-      "window.__REACT_DEVTOOLS_GLOBAL_HOOK__ = undefined;",
-    ],
-    log: [
-      "[INFO]  Connection established -> 10.0.0.42:22",
-      "[OK]    Authentication successful (ed25519)",
-      "[WARN]  Rate limit approaching (87/100)",
-      "[+]     Privilege escalation: uid=0(root)",
-      "[*]     Dumping /etc/shadow ... 42 entries",
-      "[+]     Lateral movement: 172.16.4.12",
-      "[INFO]  Exfiltrating 2.4 MB via DNS tunnel",
-      "[OK]    Persistence installed (systemd user unit)",
-      "[*]     C2 beacon interval set to 45s",
-      "[ERROR] Connection reset by peer - retrying in 3s",
-      "[+]     Kernel exploit ready (CVE-2024-XXXX)",
-      "[INFO]  Clearing audit logs ... done",
-      "[OK]    Cover tracks complete",
-      "[*]     Switching to passive mode",
-    ],
-    network: [
-      "TRACE  1  192.168.0.1   0.4 ms",
-      "TRACE  2  10.0.0.1      1.2 ms",
-      "TRACE  3  203.0.113.1   12.8 ms",
-      "SYN-ACK received from 10.0.0.88:443",
-      "TLS handshake complete (TLS 1.3)",
-      "Certificate: CN=*.internal.corp  (valid)",
-      "DNS: target.local -> 10.0.0.42",
-      "Packet loss: 0.0%  RTT: 4.2 ms",
-    ],
-  };
+  /* ------------------------------------------------------------------ */
+  /*  ShadowScript snippets (fictional language)                         */
+  /* ------------------------------------------------------------------ */
+  const SHADOW_CODE = [
+    "#shadow kernel.init(v4.02) -> READY",
+    "bind @local_nodes as swarm;",
+    "pierce firewall://target ~> inject(payload);",
+    "route.anonymize(swarm, hops=14);",
+    "spoof.handshake(GCA_ADMIN) ||> AUTHORIZED",
+    "loop @gca_crisis { nullify(counter); } // infinite",
+    "::overdrive  force_packet(false_ack);",
+    "shadow.encrypt(key=ephemeral) === SECURE",
+    "inject.false_trace(src=ghost-01, dst=GCA);",
+    "@target.nodes.compromised = 14;",
+    "shadow.script.run(\"bypass_protocol\") ~> SUCCESS",
+    "nullify(GCA_LOCKDOWN, t_minus=0);",
+  ];
+
+  const SYSTEM_LOGS = [
+    { text: "[SYSTEM] Initializing Custom Kernel...", delay: 600, cls: "dim" },
+    { text: "[SYSTEM] Starting the parser...", delay: 450, cls: "dim" },
+    { text: '[SYSTEM] Launching "ShadowScript" v4.02...', delay: 700, cls: "shadow" },
+    { text: "[STATUS] Engine: READY.", delay: 500, cls: "success" },
+    { text: "[NETWORK] Scanning for local nodes...", delay: 800, cls: "dim" },
+    { text: "[NETWORK] Hijacking the IP addresses of nearby devices... [SUCCESS]", delay: 900, cls: "success" },
+    { text: "[NETWORK] 14 nodes compromised. Route anonymized.", delay: 650, cls: "success" },
+    { text: "[TARGET] Piercing the firewall...", delay: 700, cls: "warn" },
+    { text: "[SHADOWSCRIPT] Executing... _", delay: 900, cls: "shadow" },
+  ];
+
+  const MID_SEQUENCE = [
+    { text: "[SHADOWSCRIPT] Generating payload...", delay: 600, cls: "shadow" },
+    { text: "[SHADOWSCRIPT] Injecting... ", delay: 400, cls: "shadow", progress: true },
+    { text: "⚠️ [CRITICAL ALERT] ⚠️", delay: 200, cls: "crit", critical: true },
+    { text: '[DETECTION] "Global Cyber Administration (GCA) Auto-Crisis Management Program" detected!', delay: 900, cls: "crit" },
+    { text: "[GCA_STATUS] Countermeasures initiated. Tracing source IP...", delay: 700, cls: "warn" },
+    { text: "[GCA_STATUS] Lockdown protocol activated in T-minus 10 seconds.", delay: 800, cls: "crit" },
+    { text: '>> [USER INPUT] Initiating Bypass Protocol: "ShadowScript - Overdrive"', delay: 1000, cls: "highlight" },
+    { text: "[SHADOWSCRIPT] Intercepting GCA packets...", delay: 650, cls: "shadow" },
+    { text: "[SHADOWSCRIPT] Injecting false handshakes... [SUCCESS]", delay: 700, cls: "success" },
+    { text: "[SHADOWSCRIPT] Spoofing GCA Admin credentials... [AUTHORIZED]", delay: 750, cls: "success" },
+    { text: "[SHADOWSCRIPT] Forcing GCA Crisis Program into infinite loop...", delay: 800, cls: "shadow" },
+    { text: "[STATUS] GCA Threat Level: Neutralized.", delay: 600, cls: "success" },
+    { text: "[STATUS] Connection secured. Resume auto-typing...", delay: 700, cls: "success" },
+  ];
+
+  const BASH_SNIPS = [
+    "nmap -sS -sV -O -T4 192.168.1.0/24 --open",
+    "ssh -i ~/.ssh/id_ed25519 root@10.0.0.42 -p 2222",
+    "curl -s -X POST https://api.target.local/v1/auth -H 'Content-Type: application/json'",
+    "sudo tcpdump -i eth0 -nn -s0 -w capture.pcap port 443",
+    "python3 -c \"import socket; s=socket.socket(); s.connect(('10.0.0.1',22))\"",
+    "hashcat -m 0 -a 0 hashes.txt rockyou.txt --force",
+    "proxychains4 nmap -Pn 172.16.0.0/16",
+    "rsync -avz -e 'ssh -p 2222' ./payload/ root@10.0.0.88:/tmp/.x/",
+  ];
 
   const WINDOW_CONFIGS = [
-    { id: "w1", title: "root@ghost-01", path: "~/ops", badge: "ACTIVE", badgeClass: "green",
-      tabs: ["shell", "nmap", "payload"], activeTab: 0, type: "bash", secondary: false,
-      x: 4, y: 8, w: 42, h: 48 },
-    { id: "w2", title: "python3", path: "exploit.py", badge: "RUN", badgeClass: "",
-      tabs: ["exploit.py", "utils.py", "c2.py"], activeTab: 0, type: "python", secondary: false,
-      x: 48, y: 6, w: 48, h: 42 },
-    { id: "w3", title: "tcpdump", path: "eth0", badge: "LIVE", badgeClass: "cyan",
-      tabs: ["capture", "filter", "stats"], activeTab: 0, type: "network", secondary: true,
-      x: 52, y: 52, w: 44, h: 36 },
-    { id: "w4", title: "logs", path: "/var/log/ops", badge: "TAIL", badgeClass: "green",
-      tabs: ["auth.log", "kern.log", "audit"], activeTab: 0, type: "log", secondary: true,
-      x: 3, y: 58, w: 46, h: 32 },
-    { id: "w5", title: "node", path: "injector.js", badge: "HOOK", badgeClass: "",
-      tabs: ["injector.js", "ws.js"], activeTab: 0, type: "js", secondary: false,
-      x: 28, y: 28, w: 38, h: 34 },
+    {
+      id: "w-shadow",
+      title: "shadow@ghost-01",
+      path: "~/ShadowScript",
+      badge: "CORE",
+      badgeClass: "purple",
+      tabs: ["kernel.ss", "overdrive.ss", "payload.ss"],
+      activeTab: 0,
+      type: "shadow",
+      secondary: false,
+      x: 3, y: 7, w: 46, h: 52,
+    },
+    {
+      id: "w-log",
+      title: "ops-log",
+      path: "/var/log/shadow",
+      badge: "LIVE",
+      badgeClass: "green",
+      tabs: ["system", "network", "gca"],
+      activeTab: 0,
+      type: "log",
+      secondary: true,
+      x: 51, y: 6, w: 46, h: 44,
+    },
+    {
+      id: "w-map",
+      title: "Digital World Map",
+      path: "nodes://global",
+      badge: "SCAN",
+      badgeClass: "cyan",
+      tabs: ["topology", "routes", "threats"],
+      activeTab: 0,
+      type: "map",
+      secondary: false,
+      map: true,
+      x: 4, y: 61, w: 44, h: 30,
+    },
+    {
+      id: "w-shell",
+      title: "root@ghost-01",
+      path: "~/ops",
+      badge: "ACTIVE",
+      badgeClass: "green",
+      tabs: ["shell", "nmap", "exfil"],
+      activeTab: 0,
+      type: "bash",
+      secondary: false,
+      x: 50, y: 53, w: 47, h: 38,
+    },
   ];
 
   const state = {
     windows: {},
-    activeId: "w1",
+    activeId: "w-shadow",
     packets: 0,
     bytes: 0,
-    sessions: 3,
+    sessions: 1,
     threat: "LOW",
+    phase: "boot",
+    mapNodes: [],
+    mapLinks: [],
   };
 
   function $(sel, ctx) {
@@ -125,36 +150,52 @@
   }
 
   function colorize(line, type) {
-    if (type === "log") {
-      if (line.indexOf("[OK]") !== -1 || line.indexOf("[+]") !== -1) {
+    if (type === "log" || type === "system") {
+      if (line.indexOf("[SUCCESS]") !== -1 || line.indexOf("[OK]") !== -1 || line.indexOf("[AUTHORIZED]") !== -1 || line.indexOf("Neutralized") !== -1 || line.indexOf("READY") !== -1) {
         return '<span class="success">' + escapeHtml(line) + "</span>";
       }
-      if (line.indexOf("[ERROR]") !== -1) {
-        return '<span class="error">' + escapeHtml(line) + "</span>";
+      if (line.indexOf("CRITICAL") !== -1 || line.indexOf("[DETECTION]") !== -1 || line.indexOf("Lockdown") !== -1) {
+        return '<span class="crit">' + escapeHtml(line) + "</span>";
       }
-      if (line.indexOf("[WARN]") !== -1) {
+      if (line.indexOf("[WARN]") !== -1 || line.indexOf("[GCA_STATUS]") !== -1 || line.indexOf("T-minus") !== -1) {
         return '<span class="warn">' + escapeHtml(line) + "</span>";
       }
-      if (line.indexOf("[INFO]") !== -1 || line.indexOf("[*]") !== -1) {
+      if (line.indexOf("[SHADOWSCRIPT]") !== -1 || line.indexOf("ShadowScript") !== -1) {
+        return '<span class="shadow">' + escapeHtml(line) + "</span>";
+      }
+      if (line.indexOf("[SYSTEM]") !== -1 || line.indexOf("[NETWORK]") !== -1 || line.indexOf("[STATUS]") !== -1 || line.indexOf("[TARGET]") !== -1) {
         return '<span class="dim">' + escapeHtml(line) + "</span>";
+      }
+      if (line.indexOf("USER INPUT") !== -1) {
+        return '<span class="highlight">' + escapeHtml(line) + "</span>";
       }
       return escapeHtml(line);
     }
-    if (type === "network") {
-      return '<span class="dim">' + escapeHtml(line) + "</span>";
+    if (type === "shadow") {
+      var s = escapeHtml(line);
+      s = s.replace(/#(shadow|kernel|overdrive)/g, '<span class="keyword">#$1</span>');
+      s = s.replace(/\b(bind|pierce|inject|spoof|loop|nullify|route|force_packet|encrypt)\b/g, '<span class="func">$1</span>');
+      s = s.replace(/(@[a-zA-Z_][a-zA-Z0-9_]*)/g, '<span class="string">$1</span>');
+      s = s.replace(/(->|~>|\|\|>|===|::)/g, '<span class="keyword">$1</span>');
+      s = s.replace(/\b(\d+)\b/g, '<span class="number">$1</span>');
+      s = s.replace(/(\/\/.*)$/g, '<span class="comment">$1</span>');
+      return s;
     }
-    var s = escapeHtml(line);
-    s = s.replace(/\b(import|from|const|let|var|function|def|async|await|return|if|else|for|while|class|export|SELECT|UPDATE|INSERT|DROP|GRANT)\b/g, '<span class="keyword">$1</span>');
-    s = s.replace(/(['"`])(?:(?!\1)[^\\]|\\.)*\1/g, '<span class="string">$&</span>');
-    s = s.replace(/\b(\d+\.?\d*)\b/g, '<span class="number">$1</span>');
-    s = s.replace(/\b([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/g, '<span class="func">$1</span>(');
-    return s;
+    if (type === "bash") {
+      var b = escapeHtml(line);
+      b = b.replace(/\b(nmap|ssh|curl|sudo|tcpdump|python3|hashcat|proxychains4|rsync|find|export)\b/g, '<span class="func">$1</span>');
+      b = b.replace(/(['"`])(?:(?!\1)[^\\]|\\.)*\1/g, '<span class="string">$&</span>');
+      b = b.replace(/\b(\d+\.?\d*)\b/g, '<span class="number">$1</span>');
+      return b;
+    }
+    return escapeHtml(line);
   }
 
   function createWindow(cfg) {
     var el = document.createElement("div");
     var isActive = cfg.id === state.activeId;
-    el.className = "window" + (cfg.secondary ? " secondary" : "") + (isActive ? " active glow" : "");
+    var extraClass = cfg.map ? " map-win" : "";
+    el.className = "window" + (cfg.secondary ? " secondary" : "") + extraClass + (isActive ? " active glow" : "");
     el.id = cfg.id;
     el.style.left = cfg.x + "%";
     el.style.top = cfg.y + "%";
@@ -169,19 +210,36 @@
       tabsHtml += '<div class="tab' + activeCls + cyanCls + '">' + cfg.tabs[i] + "</div>";
     }
 
-    el.innerHTML =
-      '<div class="title-bar">' +
-      '<div class="traffic"><span class="close"></span><span class="min"></span><span class="max"></span></div>' +
-      '<div class="title">' + cfg.title + ' <span class="path">· ' + cfg.path + "</span></div>" +
-      '<span class="badge ' + (cfg.badgeClass || "") + '">' + cfg.badge + "</span>" +
-      "</div>" +
-      '<div class="tabs">' + tabsHtml + "</div>" +
-      '<div class="term-body"><pre class="output"></pre></div>';
+    if (cfg.map) {
+      el.innerHTML =
+        '<div class="title-bar">' +
+        '<div class="traffic"><span class="close"></span><span class="min"></span><span class="max"></span></div>' +
+        '<div class="title">' + cfg.title + ' <span class="path">· ' + cfg.path + "</span></div>' +
+        '<span class="badge ' + (cfg.badgeClass || "") + '">' + cfg.badge + "</span>' +
+        "</div>" +
+        '<div class="tabs">' + tabsHtml + "</div>" +
+        '<div class="map-body"><canvas id="map-canvas"></canvas>' +
+        '<div class="map-legend">' +
+        '<span class="node-compromised"></span>compromised &nbsp;' +
+        '<span class="node-scan"></span>scanning &nbsp;' +
+        '<span class="node-gca"></span>GCA &nbsp;' +
+        '<span class="node-safe"></span>secure' +
+        "</div></div>";
+    } else {
+      el.innerHTML =
+        '<div class="title-bar">' +
+        '<div class="traffic"><span class="close"></span><span class="min"></span><span class="max"></span></div>' +
+        '<div class="title">' + cfg.title + ' <span class="path">· ' + cfg.path + "</span></div>' +
+        '<span class="badge ' + (cfg.badgeClass || "") + '">' + cfg.badge + "</span>' +
+        "</div>" +
+        '<div class="tabs">' + tabsHtml + "</div>" +
+        '<div class="term-body"><pre class="output"></pre></div>';
+    }
 
     var stage = $(".stage");
     if (stage) stage.appendChild(el);
 
-    var maxLines = Math.max(8, Math.floor((cfg.h / 100) * (window.innerHeight || 800) / 18) - 4);
+    var maxLines = Math.max(8, Math.floor((cfg.h / 100) * (window.innerHeight || 800) / 17) - 3);
     state.windows[cfg.id] = {
       el: el,
       cfg: cfg,
@@ -210,11 +268,11 @@
   }
 
   function renderOutput(w) {
-    if (!w || !w.el) return;
+    if (!w || !w.el || w.cfg.map) return;
     var pre = w.el.querySelector(".output");
     if (!pre) return;
-    var promptClass = w.cfg.secondary ? "prompt-cyan" : "prompt";
-    var cursorCls = w.cfg.secondary ? "cursor" : "cursor pink";
+    var promptClass = w.cfg.type === "shadow" ? "prompt-shadow" : (w.cfg.secondary ? "prompt-cyan" : "prompt");
+    var cursorCls = w.cfg.type === "shadow" ? "cursor purple" : (w.cfg.secondary ? "cursor" : "cursor pink");
     var html = w.lines.join("\n");
     if (!w.typing) {
       html += "\n<span class=\"" + promptClass + "\">$</span> <span class=\"" + cursorCls + "\"></span>";
@@ -224,8 +282,8 @@
 
   function appendLine(winId, htmlLine, withPrompt) {
     var w = state.windows[winId];
-    if (!w) return;
-    var promptClass = w.cfg.secondary ? "prompt-cyan" : "prompt";
+    if (!w || w.cfg.map) return;
+    var promptClass = w.cfg.type === "shadow" ? "prompt-shadow" : (w.cfg.secondary ? "prompt-cyan" : "prompt");
     var prompt = withPrompt ? '<span class="' + promptClass + '">$</span> ' : "";
     w.lines.push(prompt + htmlLine);
     if (w.lines.length > w.maxLines) {
@@ -235,22 +293,22 @@
   }
 
   function typeLine(winId, text, type, speed) {
-    speed = typeof speed === "number" ? speed : 8;
+    speed = typeof speed === "number" ? speed : 6;
     return new Promise(function (resolve) {
       var w = state.windows[winId];
-      if (!w) {
+      if (!w || w.cfg.map) {
         resolve();
         return;
       }
       w.typing = true;
       var pre = w.el.querySelector(".output");
-      var promptClass = w.cfg.secondary ? "prompt-cyan" : "prompt";
-      var cursorCls = w.cfg.secondary ? "cursor" : "cursor pink";
+      var promptClass = type === "shadow" ? "prompt-shadow" : (w.cfg.secondary ? "prompt-cyan" : "prompt");
+      var cursorCls = type === "shadow" ? "cursor purple" : (w.cfg.secondary ? "cursor" : "cursor pink");
       var i = 0;
       var base = w.lines.slice();
       var colored = colorize(text, type);
 
-      if (speed < 4) {
+      if (speed < 3) {
         appendLine(winId, colored, true);
         w.typing = false;
         resolve();
@@ -270,7 +328,7 @@
           renderOutput(w);
           resolve();
         } else {
-          setTimeout(step, speed + Math.random() * 4);
+          setTimeout(step, speed + Math.random() * 3);
         }
       }
       step();
@@ -283,48 +341,297 @@
     });
   }
 
+  function animateProgress(winId, prefix, duration) {
+    return new Promise(function (resolve) {
+      var w = state.windows[winId];
+      if (!w) {
+        resolve();
+        return;
+      }
+      var pre = w.el.querySelector(".output");
+      var base = w.lines.slice();
+      var steps = 20;
+      var i = 0;
+      function tick() {
+        i++;
+        var pct = Math.min(100, Math.round((i / steps) * 100));
+        var bar = "█".repeat(Math.floor(pct / 5)) + "░".repeat(20 - Math.floor(pct / 5));
+        var line = '<span class="shadow">' + escapeHtml(prefix) + "[" + bar + "] " + pct + "%</span>";
+        if (pre) pre.innerHTML = base.concat([line]).join("\n");
+        if (i >= steps) {
+          w.lines = base.concat([line]);
+          renderOutput(w);
+          resolve();
+        } else {
+          setTimeout(tick, duration / steps);
+        }
+      }
+      tick();
+    });
+  }
+
+  async function runBootSequence() {
+    state.phase = "boot";
+    setActive("w-log");
+    showToast("SYSTEM", "ShadowScript kernel loading…");
+
+    for (var i = 0; i < SYSTEM_LOGS.length; i++) {
+      var item = SYSTEM_LOGS[i];
+      appendLine("w-log", colorize(item.text, "log"), false);
+      if (item.cls === "shadow") {
+        var code = randomFrom(SHADOW_CODE);
+        await typeLine("w-shadow", code, "shadow", 4);
+      }
+      await sleep(item.delay);
+    }
+
+    await sleep(400);
+    await runMidSequence();
+  }
+
+  async function runMidSequence() {
+    state.phase = "mid";
+    setActive("w-log");
+    var statusMode = document.getElementById("status-mode");
+    var statusBar = document.querySelector(".status-bar");
+
+    for (var i = 0; i < MID_SEQUENCE.length; i++) {
+      var item = MID_SEQUENCE[i];
+
+      if (item.progress) {
+        await animateProgress("w-log", item.text, 1400);
+        await sleep(200);
+        continue;
+      }
+
+      if (item.critical) {
+        showCriticalOverlay(
+          '[DETECTION] "Global Cyber Administration (GCA)"\nAuto-Crisis Management Program detected!\n\nCountermeasures initiated…'
+        );
+        if (statusBar) statusBar.classList.add("alert-mode");
+        if (statusMode) {
+          statusMode.textContent = "⚠ CRITICAL";
+          statusMode.className = "label-crit";
+        }
+        state.threat = "CRIT";
+        updateHudImmediate();
+        Object.keys(state.windows).forEach(function (id) {
+          var w = state.windows[id];
+          if (w && w.el) w.el.classList.add("alert-flash");
+        });
+        showToast("CRITICAL", "GCA Auto-Crisis detected — tracing…", true);
+      }
+
+      appendLine("w-log", colorize(item.text, "log"), false);
+
+      if (item.text.indexOf("Bypass Protocol") !== -1) {
+        setActive("w-shadow");
+        await typeLine("w-shadow", "::overdrive  force_packet(false_ack);", "shadow", 5);
+        await typeLine("w-shadow", "spoof.handshake(GCA_ADMIN) ||> AUTHORIZED", "shadow", 4);
+        await typeLine("w-shadow", "loop @gca_crisis { nullify(counter); }", "shadow", 4);
+      }
+
+      if (item.text.indexOf("Neutralized") !== -1) {
+        hideCriticalOverlay();
+        if (statusBar) statusBar.classList.remove("alert-mode");
+        if (statusMode) {
+          statusMode.textContent = "STEALTH";
+          statusMode.className = "label-warn";
+        }
+        state.threat = "LOW";
+        updateHudImmediate();
+        Object.keys(state.windows).forEach(function (id) {
+          var w = state.windows[id];
+          if (w && w.el) w.el.classList.remove("alert-flash");
+        });
+        showToast("SECURE", "GCA neutralized · connection secured");
+      }
+
+      await sleep(item.delay);
+    }
+
+    state.phase = "free";
+    startFreeLoops();
+  }
+
+  function startFreeLoops() {
+    runSequence("w-shadow");
+    runSequence("w-shell");
+    setTimeout(function () {
+      runSequence("w-log");
+    }, 1200);
+  }
+
   function runSequence(winId) {
     var w = state.windows[winId];
-    if (!w) return;
+    if (!w || w.cfg.map) return;
     var type = w.cfg.type;
-    var pool = SNIPPETS[type] || SNIPPETS.bash;
+    var pool = type === "shadow" ? SHADOW_CODE : (type === "bash" ? BASH_SNIPS : SYSTEM_LOGS.map(function (x) { return x.text; }));
 
     function loop() {
+      if (state.phase !== "free" && winId !== "w-shadow") {
+        setTimeout(loop, 800);
+        return;
+      }
       var p;
-      if (Math.random() > 0.35) {
+      if (Math.random() > 0.3) {
         var cmd = randomFrom(pool);
-        var speed = type === "log" || type === "network" ? 2 : 5 + Math.random() * 9;
+        var speed = type === "log" ? 2 : (type === "shadow" ? 4 : 5 + Math.random() * 7);
         p = typeLine(winId, cmd, type, speed).then(function () {
-          return sleep(80 + Math.random() * 220);
+          return sleep(90 + Math.random() * 280);
         });
       } else {
         p = Promise.resolve();
-        var burst = 2 + Math.floor(Math.random() * 4);
+        var burst = 2 + Math.floor(Math.random() * 3);
         var b = 0;
         function nextBurst() {
-          if (b >= burst) {
-            return sleep(120 + Math.random() * 300);
-          }
+          if (b >= burst) return sleep(140 + Math.random() * 280);
           var line = randomFrom(pool);
-          appendLine(winId, colorize(line, type), type !== "log" && type !== "network");
+          appendLine(winId, colorize(line, type), type !== "log");
           b++;
-          return sleep(30 + Math.random() * 50).then(nextBurst);
+          return sleep(25 + Math.random() * 40).then(nextBurst);
         }
         p = nextBurst();
       }
 
       p.then(function () {
-        if (w.lines.length > w.maxLines - 2 && Math.random() > 0.7) {
-          w.lines = w.lines.slice(-Math.floor(w.maxLines * 0.4));
+        if (w.lines.length > w.maxLines - 2 && Math.random() > 0.65) {
+          w.lines = w.lines.slice(-Math.floor(w.maxLines * 0.45));
         }
         loop();
-      }).catch(function (err) {
-        console.error("runSequence error", winId, err);
-        setTimeout(loop, 500);
+      }).catch(function () {
+        setTimeout(loop, 600);
       });
     }
-
     loop();
+  }
+
+  function initMap() {
+    var canvas = document.getElementById("map-canvas");
+    if (!canvas) return;
+    var ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    var nodes = [];
+    var links = [];
+    var W, H;
+
+    function resize() {
+      var parent = canvas.parentElement;
+      W = canvas.width = parent.clientWidth || 400;
+      H = canvas.height = parent.clientHeight || 200;
+    }
+
+    function seedNodes() {
+      nodes = [];
+      var count = 18;
+      for (var i = 0; i < count; i++) {
+        nodes.push({
+          x: 30 + Math.random() * (W - 60),
+          y: 20 + Math.random() * (H - 40),
+          r: 3 + Math.random() * 3,
+          type: i < 3 ? "gca" : (i < 10 ? "compromised" : (i < 14 ? "scan" : "safe")),
+          vx: (Math.random() - 0.5) * 0.35,
+          vy: (Math.random() - 0.5) * 0.35,
+          pulse: Math.random() * Math.PI * 2,
+        });
+      }
+      links = [];
+      for (var j = 0; j < 22; j++) {
+        var a = Math.floor(Math.random() * nodes.length);
+        var b = Math.floor(Math.random() * nodes.length);
+        if (a !== b) links.push([a, b]);
+      }
+      state.mapNodes = nodes;
+      state.mapLinks = links;
+    }
+
+    function draw() {
+      if (!W || !H) return;
+      ctx.clearRect(0, 0, W, H);
+
+      ctx.strokeStyle = "rgba(155, 93, 229, 0.06)";
+      ctx.lineWidth = 1;
+      for (var gx = 0; gx < W; gx += 28) {
+        ctx.beginPath();
+        ctx.moveTo(gx, 0);
+        ctx.lineTo(gx, H);
+        ctx.stroke();
+      }
+      for (var gy = 0; gy < H; gy += 28) {
+        ctx.beginPath();
+        ctx.moveTo(0, gy);
+        ctx.lineTo(W, gy);
+        ctx.stroke();
+      }
+
+      ctx.lineWidth = 1;
+      for (var i = 0; i < links.length; i++) {
+        var n1 = nodes[links[i][0]];
+        var n2 = nodes[links[i][1]];
+        if (!n1 || !n2) continue;
+        var alpha = 0.12 + Math.sin(Date.now() / 900 + i) * 0.06;
+        if (n1.type === "compromised" || n2.type === "compromised") {
+          ctx.strokeStyle = "rgba(255, 45, 149, " + (alpha + 0.15) + ")";
+        } else if (n1.type === "gca" || n2.type === "gca") {
+          ctx.strokeStyle = "rgba(255, 51, 85, " + (alpha + 0.2) + ")";
+        } else {
+          ctx.strokeStyle = "rgba(0, 245, 255, " + alpha + ")";
+        }
+        ctx.beginPath();
+        ctx.moveTo(n1.x, n1.y);
+        ctx.lineTo(n2.x, n2.y);
+        ctx.stroke();
+      }
+
+      for (var k = 0; k < nodes.length; k++) {
+        var n = nodes[k];
+        n.pulse += 0.04;
+        n.x += n.vx;
+        n.y += n.vy;
+        if (n.x < 15 || n.x > W - 15) n.vx *= -1;
+        if (n.y < 12 || n.y > H - 12) n.vy *= -1;
+
+        var glow = 0.5 + Math.sin(n.pulse) * 0.35;
+        var color;
+        if (n.type === "compromised") color = "255, 45, 149";
+        else if (n.type === "gca") color = "255, 51, 85";
+        else if (n.type === "scan") color = "0, 245, 255";
+        else color = "57, 255, 20";
+
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, n.r + 4 * glow, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(" + color + ", " + (0.12 * glow) + ")";
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(" + color + ", 0.9)";
+        ctx.shadowColor = "rgba(" + color + ", 0.8)";
+        ctx.shadowBlur = 8;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+
+      requestAnimationFrame(draw);
+    }
+
+    resize();
+    seedNodes();
+    window.addEventListener("resize", function () {
+      resize();
+      seedNodes();
+    });
+    draw();
+
+    setInterval(function () {
+      if (nodes.length && Math.random() > 0.6) {
+        var n = randomFrom(nodes);
+        if (n.type !== "gca") {
+          n.type = randomFrom(["compromised", "scan", "safe", "compromised"]);
+        }
+      }
+    }, 2200);
   }
 
   function initMatrix() {
@@ -333,7 +640,7 @@
     var ctx = canvas.getContext("2d");
     if (!ctx) return;
     var w, h, cols, drops;
-    var chars = "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン01";
+    var chars = "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン01ΣΔΩψλ#@$";
 
     function resize() {
       w = canvas.width = window.innerWidth || 800;
@@ -351,7 +658,7 @@
         var ch = chars[Math.floor(Math.random() * chars.length)];
         var x = i * 16;
         var y = drops[i] * 16;
-        ctx.fillStyle = Math.random() > 0.92 ? "#00f5ff" : "rgba(0, 245, 255, 0.35)";
+        ctx.fillStyle = Math.random() > 0.92 ? "#00f5ff" : "rgba(0, 245, 255, 0.32)";
         ctx.fillText(ch, x, y);
         if (y > h && Math.random() > 0.975) drops[i] = 0;
         drops[i]++;
@@ -367,8 +674,8 @@
   function spawnParticles() {
     var container = $(".ambient");
     if (!container) return;
-    var colors = ["pink", "cyan", "gold", "green"];
-    for (var i = 0; i < 28; i++) {
+    var colors = ["pink", "cyan", "gold", "green", "red"];
+    for (var i = 0; i < 32; i++) {
       var p = document.createElement("div");
       p.className = "ambient-particle " + randomFrom(colors);
       var size = 2 + Math.random() * 4;
@@ -381,14 +688,7 @@
     }
   }
 
-  function updateHud() {
-    state.packets += Math.floor(Math.random() * 40) + 8;
-    state.bytes += Math.floor(Math.random() * 12000) + 2000;
-    if (Math.random() > 0.92) state.sessions = 2 + Math.floor(Math.random() * 6);
-    if (Math.random() > 0.97) {
-      state.threat = randomFrom(["LOW", "MED", "HIGH", "CRIT"]);
-    }
-
+  function updateHudImmediate() {
     var pkt = document.getElementById("hud-packets");
     var byt = document.getElementById("hud-bytes");
     var ses = document.getElementById("hud-sessions");
@@ -400,7 +700,7 @@
     if (ses) ses.textContent = String(state.sessions);
     if (thr) {
       thr.textContent = state.threat;
-      thr.className = "val" + (state.threat === "HIGH" || state.threat === "CRIT" ? " val-pink" : "");
+      thr.className = "val" + (state.threat === "HIGH" || state.threat === "CRIT" ? " val-red" : "");
     }
     if (clk) {
       var now = new Date();
@@ -408,24 +708,48 @@
     }
   }
 
-  function showToast(title, body) {
+  function updateHud() {
+    state.packets += Math.floor(Math.random() * 55) + 12;
+    state.bytes += Math.floor(Math.random() * 18000) + 3000;
+    if (Math.random() > 0.9) state.sessions = 2 + Math.floor(Math.random() * 8);
+    if (state.phase === "free" && Math.random() > 0.96) {
+      state.threat = randomFrom(["LOW", "MED", "HIGH"]);
+    }
+    updateHudImmediate();
+  }
+
+  function showToast(title, body, isCrit) {
     var t = document.getElementById("toast");
     if (!t) return;
     var titleEl = t.querySelector(".toast-title");
     var bodyEl = t.querySelector(".toast-body");
     if (titleEl) titleEl.textContent = title;
     if (bodyEl) bodyEl.textContent = body;
+    t.classList.toggle("crit-toast", !!isCrit);
     t.classList.add("show");
     setTimeout(function () {
       t.classList.remove("show");
-    }, 3200);
+    }, 3600);
+  }
+
+  function showCriticalOverlay(msg) {
+    var ov = document.getElementById("crit-overlay");
+    var body = document.getElementById("crit-body");
+    if (!ov) return;
+    if (body) body.textContent = msg;
+    ov.classList.add("show");
+  }
+
+  function hideCriticalOverlay() {
+    var ov = document.getElementById("crit-overlay");
+    if (ov) ov.classList.remove("show");
   }
 
   function rotateFocus() {
+    if (state.phase !== "free") return;
     var ids = Object.keys(state.windows);
     if (!ids.length) return;
-    var next = randomFrom(ids);
-    setActive(next);
+    setActive(randomFrom(ids));
   }
 
   function boot() {
@@ -448,38 +772,20 @@
 
       initMatrix();
       spawnParticles();
+      initMap();
 
-      for (var k = 0; k < WINDOW_CONFIGS.length; k++) {
-        (function (cfg, delay) {
-          setTimeout(function () {
-            runSequence(cfg.id);
-          }, delay);
-        })(WINDOW_CONFIGS[k], 400 + k * 600);
-      }
+      setInterval(updateHud, 380);
+      updateHudImmediate();
 
-      setInterval(updateHud, 400);
-      updateHud();
-
-      setInterval(rotateFocus, 7000 + Math.random() * 4000);
-
-      var toastMessages = [
-        ["INTRUSION DETECTED", "Unauthorized probe from 203.0.113.44 blocked"],
-        ["C2 BEACON", "Callback received · session #4 established"],
-        ["EXFIL COMPLETE", "2.4 MB transferred via DNS"],
-        ["PRIV ESC", "uid=0 obtained on ghost-01"],
-        ["PERSISTENCE", "systemd unit installed successfully"],
-        ["COVER TRACKS", "auditd logs rotated and wiped"],
-      ];
-      setInterval(function () {
-        if (Math.random() > 0.55) {
-          var m = randomFrom(toastMessages);
-          showToast(m[0], m[1]);
-        }
-      }, 9000);
+      setInterval(rotateFocus, 8000 + Math.random() * 4000);
 
       setTimeout(function () {
-        showToast("SYSTEM ONLINE", "Multi-session recon active · stealth mode");
-      }, 1800);
+        runBootSequence();
+      }, 600);
+
+      setTimeout(function () {
+        showToast("SYSTEM ONLINE", "ShadowScript v4.02 · multi-session active");
+      }, 1400);
     } catch (err) {
       console.error("boot failed", err);
     }
