@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
-  <meta name="description" content="画面デコ — Hacker Terminal Infinite Loop Animation. 5G-staff design language.">
+  <meta name="description" content="画面デコ — ShadowScript Hacker Terminal. 5G-staff design language.">
   <meta name="theme-color" content="#07050f">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>画面デコ · HACK</title>
+  <title>画面デコ · SHADOWSCRIPT</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+JP:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/hack.css">
 </head>
@@ -27,16 +27,24 @@
       <span class="dot"></span>
       <span class="label-active">OPS · LIVE</span>
       <span>ghost-01</span>
-      <span class="label-warn">STEALTH</span>
+      <span class="label-warn" id="status-mode">STEALTH</span>
     </div>
     <div class="right">
       <span id="hud-clock">00:00:00</span>
-      <span>ENCRYPTED</span>
+      <span id="hud-enc">ENCRYPTED</span>
     </div>
   </div>
 
   <!-- Main stage (windows live here) -->
   <div class="stage" id="stage"></div>
+
+  <!-- Critical overlay (GCA alert) -->
+  <div class="crit-overlay" id="crit-overlay" aria-hidden="true">
+    <div class="crit-box">
+      <div class="crit-title">⚠️ [CRITICAL ALERT] ⚠️</div>
+      <div class="crit-body" id="crit-body"></div>
+    </div>
+  </div>
 
   <!-- Toast -->
   <div class="toast" id="toast">
@@ -50,7 +58,7 @@
     <span>XFER <span class="val" id="hud-bytes">0 KB</span></span>
     <span>SESS <span class="val" id="hud-sessions">0</span></span>
     <span>THREAT <span class="val" id="hud-threat">LOW</span></span>
-    <span style="margin-left:auto; opacity:0.5;">画面デコ · 5G DESIGN</span>
+    <span style="margin-left:auto; opacity:0.5;">画面デコ · SHADOWSCRIPT v4.02</span>
   </div>
 
   <div class="brand">G⁵ · SCREEN DECO</div>
