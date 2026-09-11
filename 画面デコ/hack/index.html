@@ -108,24 +108,21 @@
         offSequence: "off",
         enterCountRequired: 3,
         onLock: function () {
-          if (window.ShadowCMD) ShadowCMD.toast("LOCK", "Session sealed · module active");
+          /* stealth: no UI change when armed */
         },
         onAlertStart: function () {
-          if (window.ShadowCMD) ShadowCMD.toast("ALERT", "Unauthorized interaction · siren active", true);
-          var mode = document.getElementById("status-mode");
-          if (mode) { mode.textContent = "ALERT"; mode.className = "label-crit"; }
+          var thr = document.getElementById("hud-threat");
+          if (thr) { thr.textContent = "HIGH"; thr.className = "val val-red"; }
         },
         onAlertStop: function () {
-          var mode = document.getElementById("status-mode");
-          if (mode && LockSystem.isLocked()) {
-            mode.textContent = "LOCKED";
-            mode.className = "label-crit";
-          }
+          var thr = document.getElementById("hud-threat");
+          if (thr) { thr.textContent = "LOW"; thr.className = "val"; }
         },
         onUnlock: function () {
+          var thr = document.getElementById("hud-threat");
+          if (thr) { thr.textContent = "LOW"; thr.className = "val"; }
           var mode = document.getElementById("status-mode");
           if (mode) { mode.textContent = "STEALTH"; mode.className = "label-warn"; }
-          if (window.ShadowCMD) ShadowCMD.toast("UNLOCK", "Session restored");
         }
       });
     }
