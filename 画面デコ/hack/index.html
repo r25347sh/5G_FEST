@@ -1,1 +1,60 @@
-see file
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="SHADOWSCRIPT — Black-ops terminal simulation.">
+  <meta name="theme-color" content="#07050f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>SHADOWSCRIPT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/hack.css">
+</head>
+<body>
+  <canvas id="matrix-canvas" aria-hidden="true"></canvas>
+  <div class="ambient" aria-hidden="true"></div>
+
+  <div class="status-bar">
+    <div class="left">
+      <span class="dot"></span>
+      <span class="label-active">OPS · LIVE</span>
+      <span>ghost-01</span>
+      <span class="label-warn" id="status-mode">STEALTH</span>
+    </div>
+    <div class="right">
+      <span id="hud-clock">00:00:00</span>
+      <span id="hud-enc">ENCRYPTED</span>
+    </div>
+  </div>
+
+  <div class="stage" id="stage"></div>
+
+  <div class="crit-overlay" id="crit-overlay" aria-hidden="true">
+    <div class="crit-box">
+      <div class="crit-title">[CRITICAL ALERT]</div>
+      <div class="crit-body" id="crit-body"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">
+    <div class="toast-title">ALERT</div>
+    <div class="toast-body">—</div>
+  </div>
+
+  <div class="hud-bottom">
+    <span>PKTS <span class="val" id="hud-packets">0</span></span>
+    <span>XFER <span class="val" id="hud-bytes">0 KB</span></span>
+    <span>SESS <span class="val" id="hud-sessions">0</span></span>
+    <span>THREAT <span class="val" id="hud-threat">LOW</span></span>
+    <span style="margin-left:auto; opacity:0.5;">SHADOWSCRIPT v4.1</span>
+  </div>
+
+  <div class="brand">G5 · SCREEN DECO</div>
+
+  <script src="js/hack.js"></script>
+</body>
+</html>
