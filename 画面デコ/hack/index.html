@@ -13,6 +13,7 @@
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/hack.css">
+  <link rel="stylesheet" href="css/ops.css">
   <style>
     .cmd-console {
       position: fixed;
@@ -107,9 +108,7 @@
         unlockSequence: "asobiseminar",
         offSequence: "off",
         enterCountRequired: 3,
-        onLock: function () {
-          /* stealth: no UI change when armed */
-        },
+        onLock: function () {},
         onAlertStart: function () {
           var thr = document.getElementById("hud-threat");
           if (thr) { thr.textContent = "HIGH"; thr.className = "val val-red"; }
