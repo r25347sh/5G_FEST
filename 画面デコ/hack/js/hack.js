@@ -41,7 +41,7 @@
     if(cfg.secondary)extraCls+=" secondary";if(cfg.map)extraCls+=" map-win";if(cfg.type==="alert")extraCls+=" alert-win";if(isActive)extraCls+=" active glow";
     el.className="window"+extraCls;el.id=cfg.id;el.style.left=cfg.x+"%";el.style.top=cfg.y+"%";el.style.width=cfg.w+"%";el.style.height=cfg.h+"%";el.style.zIndex=isActive?"40":String(10+Math.floor(Math.random()*10));
     var tabsHtml="";for(var i=0;i<cfg.tabs.length;i++)tabsHtml+='<div class="tab'+(i===cfg.activeTab?" active":"")+(cfg.secondary?" cyan-active":"")+'">'+cfg.tabs[i]+"</div>";
-    var titlePart='<div class="title-bar"><div class="traffic"><span class="close"></span><span class="min"></span><span class="max"></span></div><div class="title">'+cfg.title+' <span class="path">· '+cfg.path+"</span></div><span class="badge "+(cfg.badgeClass||"")+'">'+cfg.badge+'</span></div><div class="tabs">'+tabsHtml+"</div>";
+    var titlePart='<div class="title-bar"><div class="traffic"><span class="close"></span><span class="min"></span><span class="max"></span></div>'+'<div class="title">'+cfg.title+' <span class="path">· '+cfg.path+'</span></div>'+'<span class="badge '+(cfg.badgeClass||'')+'">'+cfg.badge+'</span></div>'+'<div class="tabs">'+tabsHtml+'</div>';
     if(cfg.map)el.innerHTML=titlePart+'<div class="map-body"><canvas id="map-canvas"></canvas><div class="map-legend"><span class="node-compromised"></span>owned &nbsp;<span class="node-scan"></span>scan &nbsp;<span class="node-gca"></span>defense &nbsp;<span class="node-safe"></span>clean</div></div>';
     else el.innerHTML=titlePart+'<div class="term-body"><pre class="output"></pre></div>';
     var stage=$(".stage");if(stage)stage.appendChild(el);
