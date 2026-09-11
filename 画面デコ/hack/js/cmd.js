@@ -47,15 +47,12 @@
         return false;
       }
       if (global.LockSystem.isLocked && global.LockSystem.isLocked()) {
-        toast("LOCK", "already sealed");
         return true;
       }
       global.LockSystem.startLock();
-      setMode("LOCKED", "label-crit");
       return true;
     },
     deactivate: function () {
-      toast("LOCK", "use unlock sequence — deactivate denied");
       return false;
     }
   };
@@ -155,16 +152,14 @@
     desc: "Force alert audio if lock is active",
     activate: function () {
       if (!global.LockSystem || !global.LockSystem.isLocked || !global.LockSystem.isLocked()) {
-        toast("SIREN", "lock not active — activate lock.js first", true);
+        toast("SIREN", "subsystem not ready", true);
         return false;
       }
       if (global.LockSystem.startAlert) global.LockSystem.startAlert();
-      toast("SIREN", "alert forced", true);
       return true;
     },
     deactivate: function () {
       if (global.LockSystem && global.LockSystem.stopAlert) global.LockSystem.stopAlert();
-      toast("SIREN", "alert silenced");
       return true;
     }
   };
@@ -272,13 +267,12 @@
   function cmdStatus() {
     var locked = global.LockSystem && global.LockSystem.isLocked && global.LockSystem.isLocked();
     var alerting = global.LockSystem && global.LockSystem.isAlerting && global.LockSystem.isAlerting();
-    var msg = "lock=" + (locked ? "SEALED" : "open") +
-      " siren=" + (alerting ? "ON" : "off") +
-      " matrix=" + (FLAGS.matrix ? "on" : "off") +
+    var msg = "matrix=" + (FLAGS.matrix ? "on" : "off") +
       " noise=" + (FLAGS.noise ? "ON" : "off") +
       " stealth=" + (FLAGS.stealth ? "on" : "off") +
       " c2=" + (global.__SHADOW_C2 ? "up" : "down") +
       " exfil=" + (global.__SHADOW_EXFIL ? "armed" : "off");
+    if (alerting) msg = "siren=ON · " + msg;
     toast("STATUS", msg);
     console.log("[STATUS]", { lock: locked, siren: alerting, flags: FLAGS, c2: !!global.__SHADOW_C2, exfil: !!global.__SHADOW_EXFIL });
     return true;
