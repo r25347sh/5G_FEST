@@ -83,7 +83,7 @@
     <span class="prompt">$</span>
     <input type="text" id="cmd-input" autocomplete="off" spellcheck="false"
            placeholder="command…" aria-label="Command input">
-    <span class="hint">enter to run</span>
+    <span class="hint">help · activate <mod></span>
   </div>
 
   <div class="hud-bottom">
@@ -98,6 +98,7 @@
 
   <script src="js/lock.js"></script>
   <script src="js/hack.js"></script>
+  <script src="js/cmd.js"></script>
   <script>
   (function () {
     if (window.LockSystem) {
@@ -107,31 +108,12 @@
         offSequence: "off",
         enterCountRequired: 3,
         onLock: function () {
-          var t = document.getElementById("toast");
-          if (t) {
-            var title = t.querySelector(".toast-title");
-            var body = t.querySelector(".toast-body");
-            if (title) title.textContent = "LOCK";
-            if (body) body.textContent = "Session sealed · module active";
-            t.classList.add("show");
-            setTimeout(function () { t.classList.remove("show"); }, 2800);
-          }
+          if (window.ShadowCMD) ShadowCMD.toast("LOCK", "Session sealed · module active");
         },
         onAlertStart: function () {
-          var t = document.getElementById("toast");
-          if (t) {
-            var title = t.querySelector(".toast-title");
-            var body = t.querySelector(".toast-body");
-            if (title) title.textContent = "ALERT";
-            if (body) body.textContent = "Unauthorized interaction · siren active";
-            t.classList.add("crit-toast", "show");
-            setTimeout(function () { t.classList.remove("show"); }, 3200);
-          }
+          if (window.ShadowCMD) ShadowCMD.toast("ALERT", "Unauthorized interaction · siren active", true);
           var mode = document.getElementById("status-mode");
-          if (mode) {
-            mode.textContent = "ALERT";
-            mode.className = "label-crit";
-          }
+          if (mode) { mode.textContent = "ALERT"; mode.className = "label-crit"; }
         },
         onAlertStop: function () {
           var mode = document.getElementById("status-mode");
@@ -142,57 +124,11 @@
         },
         onUnlock: function () {
           var mode = document.getElementById("status-mode");
-          if (mode) {
-            mode.textContent = "STEALTH";
-            mode.className = "label-warn";
-          }
-          var t = document.getElementById("toast");
-          if (t) {
-            var title = t.querySelector(".toast-title");
-            var body = t.querySelector(".toast-body");
-            if (title) title.textContent = "UNLOCK";
-            if (body) body.textContent = "Session restored";
-            t.classList.remove("crit-toast");
-            t.classList.add("show");
-            setTimeout(function () { t.classList.remove("show"); }, 2500);
-          }
+          if (mode) { mode.textContent = "STEALTH"; mode.className = "label-warn"; }
+          if (window.ShadowCMD) ShadowCMD.toast("UNLOCK", "Session restored");
         }
       });
     }
-
-    var input = document.getElementById("cmd-input");
-    if (!input) return;
-
-    input.addEventListener("keydown", function (e) {
-      if (e.key !== "Enter") return;
-      e.preventDefault();
-      var raw = (input.value || "").trim();
-      var cmd = raw.toLowerCase();
-      input.value = "";
-
-      if (cmd === "activate lock.js" || cmd === "activate lock" || cmd === "lock.js") {
-        if (window.LockSystem) {
-          LockSystem.startLock();
-          var mode = document.getElementById("status-mode");
-          if (mode) {
-            mode.textContent = "LOCKED";
-            mode.className = "label-crit";
-          }
-        }
-        return;
-      }
-
-      var t = document.getElementById("toast");
-      if (t && raw) {
-        var title = t.querySelector(".toast-title");
-        var body = t.querySelector(".toast-body");
-        if (title) title.textContent = "CMD";
-        if (body) body.textContent = "unknown: " + raw.slice(0, 40);
-        t.classList.remove("crit-toast");
-        t.classList.add("show");
-        setTimeout(function () { t.classList.remove("show"); }, 2000);
-      }
-    });
   })();
   </script>
 </body>
