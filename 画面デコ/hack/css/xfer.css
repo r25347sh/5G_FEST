@@ -1,0 +1,229 @@
+/* --- transfer / process bars --- */
+.xfer-panel {
+  position: fixed;
+  right: 14px;
+  bottom: 88px;
+  z-index: 120;
+  width: min(340px, calc(100vw - 28px));
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+  font-family: "JetBrains Mono", monospace;
+}
+.xfer-bar {
+  background: rgba(8, 6, 16, 0.92);
+  border: 1px solid rgba(0, 245, 255, 0.28);
+  border-radius: 6px;
+  padding: 8px 10px;
+  box-shadow: 0 0 16px rgba(0, 0, 0, 0.45);
+  animation: xfer-in 0.35s ease-out;
+  transition: opacity 0.45s, transform 0.45s;
+}
+.xfer-bar.fade { opacity: 0; transform: translateX(12px); }
+.xfer-bar.done .xfer-fill { background: linear-gradient(90deg, #39ff14, #00f5ff); }
+.xfer-bar.kind-download { border-color: rgba(0, 245, 255, 0.4); }
+.xfer-bar.kind-upload { border-color: rgba(255, 45, 149, 0.4); }
+.xfer-bar.kind-process { border-color: rgba(155, 93, 229, 0.45); }
+.xfer-bar.kind-decrypt { border-color: rgba(255, 215, 0, 0.4); }
+.xfer-bar.kind-compile { border-color: rgba(57, 255, 20, 0.35); }
+.xfer-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #e8e0f5;
+  margin-bottom: 5px;
+}
+.xfer-kind { color: #00f5ff; font-weight: 600; letter-spacing: 0.04em; }
+.xfer-bar.kind-upload .xfer-kind { color: #ff2d95; }
+.xfer-bar.kind-process .xfer-kind { color: #9b5de5; }
+.xfer-bar.kind-decrypt .xfer-kind { color: #ffd700; }
+.xfer-bar.kind-compile .xfer-kind { color: #39ff14; }
+.xfer-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; opacity: 0.9; }
+.xfer-pct { color: #39ff14; font-variant-numeric: tabular-nums; }
+.xfer-track {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.xfer-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #00f5ff, #9b5de5, #ff2d95);
+  background-size: 200% 100%;
+  animation: xfer-shine 1.2s linear infinite;
+  border-radius: 3px;
+  box-shadow: 0 0 8px rgba(0, 245, 255, 0.45);
+}
+.xfer-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  font-size: 10px;
+  color: rgba(245, 240, 255, 0.45);
+}
+@keyframes xfer-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes xfer-shine {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+/* --- roulette overlay (5G-staff adapted) --- */
+.roulette-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(4, 2, 10, 0.78);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
+}
+.roulette-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+.roulette-panel {
+  width: min(460px, 96vw);
+  background: rgba(10, 7, 18, 0.96);
+  border: 1px solid rgba(255, 215, 0, 0.35);
+  border-radius: 12px;
+  padding: 14px 16px 18px;
+  box-shadow: 0 0 40px rgba(255, 45, 149, 0.2);
+  font-family: "JetBrains Mono", monospace;
+}
+.roulette-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.roulette-title {
+  font-weight: 700;
+  color: #ffd700;
+  letter-spacing: 0.08em;
+  font-size: 13px;
+}
+.roulette-bal { margin-left: auto; color: #e8e0f5; font-size: 12px; }
+.roulette-bal b { color: #39ff14; }
+.roulette-x {
+  background: transparent;
+  border: none;
+  color: #aaa;
+  font-size: 22px;
+  cursor: pointer;
+  line-height: 1;
+}
+.wheel-stage {
+  position: relative;
+  width: min(86vw, 320px);
+  height: min(86vw, 320px);
+  margin: 0 auto 12px;
+}
+.wheel-outer {
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, transparent 58%, rgba(255,215,0,0.15) 59%, rgba(255,215,0,0.45) 62%, #1a1228 68%, #0a0712 100%);
+  box-shadow: 0 0 0 3px rgba(255,215,0,0.5), 0 0 24px rgba(255,45,149,0.22);
+}
+#rl-canvas {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 86%; height: 86%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+}
+.wheel-pointer {
+  position: absolute;
+  top: -4px; left: 50%;
+  transform: translateX(-50%);
+  width: 0; height: 0;
+  border-left: 11px solid transparent;
+  border-right: 11px solid transparent;
+  border-top: 24px solid #ffd700;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
+  z-index: 5;
+}
+.wheel-hub {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 16%; height: 16%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffe9a0, #ffd700 45%, #b8860b);
+  z-index: 4;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.65rem; font-weight: 700; color: #3a2a00;
+}
+.roulette-result {
+  text-align: center;
+  font-size: 15px;
+  color: #e8e0f5;
+  min-height: 1.4em;
+  margin-bottom: 10px;
+}
+.roulette-result .landed.red { color: #ff4d6d; font-weight: 700; font-size: 1.3em; }
+.roulette-result .landed.black { color: #ccc; font-weight: 700; font-size: 1.3em; }
+.roulette-result .landed.green { color: #39ff14; font-weight: 700; font-size: 1.3em; }
+.roulette-result .betmsg { color: #00f5ff; margin-left: 8px; font-size: 12px; }
+.roulette-bets {
+  display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 10px;
+}
+.bet-chip {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: #e8e0f5;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+.bet-chip.active { border-color: #ffd700; color: #ffd700; box-shadow: 0 0 8px rgba(255,215,0,0.3); }
+.roulette-actions { display: flex; gap: 8px; justify-content: center; margin-bottom: 10px; }
+.rl-spin {
+  background: linear-gradient(135deg, #9b5de5, #ff2d95);
+  border: none;
+  color: #fff;
+  font-weight: 700;
+  padding: 10px 28px;
+  border-radius: 6px;
+  font-family: inherit;
+  cursor: pointer;
+  letter-spacing: 0.1em;
+}
+.rl-spin:disabled { opacity: 0.5; cursor: wait; }
+.rl-clear {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #aaa;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-family: inherit;
+  cursor: pointer;
+  font-size: 11px;
+}
+.roulette-hist {
+  display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; min-height: 22px;
+}
+.roulette-hist span {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 22px; border-radius: 3px; font-size: 11px; font-weight: 600;
+}
+.roulette-hist .h-red { background: #c41e3a; color: #fff; }
+.roulette-hist .h-black { background: #222; color: #eee; }
+.roulette-hist .h-green { background: #0a6b3c; color: #fff; }
+.roulette-hint {
+  text-align: center;
+  margin-top: 8px;
+  font-size: 10px;
+  color: rgba(245,240,255,0.35);
+}
