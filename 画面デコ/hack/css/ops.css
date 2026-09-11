@@ -1,0 +1,38 @@
+/* ShadowOps visual control surface */
+body.ops-glitch .window {
+  animation: ops-jitter 0.12s steps(2) infinite;
+}
+body.ops-glitch .stage {
+  filter: hue-rotate(20deg) contrast(1.15);
+}
+@keyframes ops-jitter {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-2px, 1px); }
+  50% { transform: translate(2px, -1px); }
+  75% { transform: translate(-1px, -2px); }
+  100% { transform: translate(0, 0); }
+}
+
+body.ops-redalert {
+  background: #120008 !important;
+}
+body.ops-redalert .status-bar {
+  border-bottom-color: rgba(255, 51, 85, 0.7);
+  box-shadow: 0 0 24px rgba(255, 51, 85, 0.35);
+}
+body.ops-redalert .window {
+  border-color: rgba(255, 51, 85, 0.45);
+  box-shadow: 0 0 18px rgba(255, 51, 85, 0.2);
+}
+body.ops-redalert #matrix-canvas {
+  opacity: 0.55;
+  filter: hue-rotate(-30deg) saturate(1.4);
+}
+
+body.ops-frozen .window .output {
+  opacity: 0.55;
+}
+body.ops-frozen .status-bar .dot {
+  animation: none;
+  background: #666;
+}
