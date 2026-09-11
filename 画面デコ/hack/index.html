@@ -13,6 +13,40 @@
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/hack.css">
+  <style>
+    .cmd-console {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 28px;
+      z-index: 150;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: rgba(6, 4, 12, 0.92);
+      border-top: 1px solid rgba(255, 45, 149, 0.25);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12px;
+    }
+    .cmd-console .prompt { color: #39ff14; flex-shrink: 0; }
+    .cmd-console input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #e8e0f5;
+      font-family: inherit;
+      font-size: inherit;
+      caret-color: #00f5ff;
+    }
+    .cmd-console input::placeholder { color: rgba(245, 240, 255, 0.28); }
+    .cmd-console .hint {
+      color: rgba(245, 240, 255, 0.35);
+      font-size: 10px;
+      white-space: nowrap;
+    }
+  </style>
 </head>
 <body>
   <canvas id="matrix-canvas" aria-hidden="true"></canvas>
@@ -45,6 +79,13 @@
     <div class="toast-body">—</div>
   </div>
 
+  <div class="cmd-console" id="cmd-console">
+    <span class="prompt">$</span>
+    <input type="text" id="cmd-input" autocomplete="off" spellcheck="false"
+           placeholder="command…" aria-label="Command input">
+    <span class="hint">enter to run</span>
+  </div>
+
   <div class="hud-bottom">
     <span>PKTS <span class="val" id="hud-packets">0</span></span>
     <span>XFER <span class="val" id="hud-bytes">0 KB</span></span>
@@ -55,6 +96,104 @@
 
   <div class="brand">G5 · SCREEN DECO</div>
 
+  <script src="js/lock.js"></script>
   <script src="js/hack.js"></script>
+  <script>
+  (function () {
+    if (window.LockSystem) {
+      LockSystem.init({
+        audioSrc: "https://r25347sh.github.io/free_note/lock/alert.mp3",
+        unlockSequence: "asobiseminar",
+        offSequence: "off",
+        enterCountRequired: 3,
+        onLock: function () {
+          var t = document.getElementById("toast");
+          if (t) {
+            var title = t.querySelector(".toast-title");
+            var body = t.querySelector(".toast-body");
+            if (title) title.textContent = "LOCK";
+            if (body) body.textContent = "Session sealed · module active";
+            t.classList.add("show");
+            setTimeout(function () { t.classList.remove("show"); }, 2800);
+          }
+        },
+        onAlertStart: function () {
+          var t = document.getElementById("toast");
+          if (t) {
+            var title = t.querySelector(".toast-title");
+            var body = t.querySelector(".toast-body");
+            if (title) title.textContent = "ALERT";
+            if (body) body.textContent = "Unauthorized interaction · siren active";
+            t.classList.add("crit-toast", "show");
+            setTimeout(function () { t.classList.remove("show"); }, 3200);
+          }
+          var mode = document.getElementById("status-mode");
+          if (mode) {
+            mode.textContent = "ALERT";
+            mode.className = "label-crit";
+          }
+        },
+        onAlertStop: function () {
+          var mode = document.getElementById("status-mode");
+          if (mode && LockSystem.isLocked()) {
+            mode.textContent = "LOCKED";
+            mode.className = "label-crit";
+          }
+        },
+        onUnlock: function () {
+          var mode = document.getElementById("status-mode");
+          if (mode) {
+            mode.textContent = "STEALTH";
+            mode.className = "label-warn";
+          }
+          var t = document.getElementById("toast");
+          if (t) {
+            var title = t.querySelector(".toast-title");
+            var body = t.querySelector(".toast-body");
+            if (title) title.textContent = "UNLOCK";
+            if (body) body.textContent = "Session restored";
+            t.classList.remove("crit-toast");
+            t.classList.add("show");
+            setTimeout(function () { t.classList.remove("show"); }, 2500);
+          }
+        }
+      });
+    }
+
+    var input = document.getElementById("cmd-input");
+    if (!input) return;
+
+    input.addEventListener("keydown", function (e) {
+      if (e.key !== "Enter") return;
+      e.preventDefault();
+      var raw = (input.value || "").trim();
+      var cmd = raw.toLowerCase();
+      input.value = "";
+
+      if (cmd === "activate lock.js" || cmd === "activate lock" || cmd === "lock.js") {
+        if (window.LockSystem) {
+          LockSystem.startLock();
+          var mode = document.getElementById("status-mode");
+          if (mode) {
+            mode.textContent = "LOCKED";
+            mode.className = "label-crit";
+          }
+        }
+        return;
+      }
+
+      var t = document.getElementById("toast");
+      if (t && raw) {
+        var title = t.querySelector(".toast-title");
+        var body = t.querySelector(".toast-body");
+        if (title) title.textContent = "CMD";
+        if (body) body.textContent = "unknown: " + raw.slice(0, 40);
+        t.classList.remove("crit-toast");
+        t.classList.add("show");
+        setTimeout(function () { t.classList.remove("show"); }, 2000);
+      }
+    });
+  })();
+  </script>
 </body>
 </html>
